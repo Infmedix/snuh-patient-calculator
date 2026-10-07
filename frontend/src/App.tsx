@@ -19,7 +19,7 @@ import PatientPanel from "./views/PatientPanel";
 import SummaryTable, { type LiveResult } from "./views/SummaryTable";
 
 /** 그룹 표시 순서 - 백엔드 레지스트리 순서와 같다. 서버가 새 그룹을 보내면 뒤에 붙는다. */
-const GROUP_ORDER = ["신체·신장", "심혈관", "간", "중증도", "영양"];
+const GROUP_ORDER = ["신체·신장", "심혈관", "간", "조기경고", "중증도", "동반질환", "영양"];
 const SUMMARY_TAB = "요약";
 
 export default function App() {
@@ -288,7 +288,14 @@ export default function App() {
                 </nav>
 
                 <div hidden={tab !== SUMMARY_TAB}>
-                  <SummaryTable specs={specs.items} groups={groups} live={live} hasPatient={!!overview} onJump={jumpTo} />
+                  <SummaryTable
+                    specs={specs.items}
+                    groups={groups}
+                    live={live}
+                    hasPatient={!!overview}
+                    onJump={jumpTo}
+                    copyContext={overview ? { patientId: overview.snapshot.patient.id, fetchedAt: overview.snapshot.fetched_at } : null}
+                  />
                 </div>
 
                 {groups.map((g) => (
@@ -302,6 +309,7 @@ export default function App() {
                           flagLabels={overview?.flag_labels ?? specs.flags}
                           onResult={onResult}
                           focusSeq={focus[spec.id] ?? 0}
+                          copyContext={overview ? { patientId: overview.snapshot.patient.id, fetchedAt: overview.snapshot.fetched_at } : null}
                         />
                       ))}
                     </div>

@@ -4,6 +4,7 @@ import { CATEGORY_LABEL, daysAgo, fmtDateTime, fmtNum } from "../format";
 import { autoCount, initialForm, missingRequired, setField, toPayload, type FieldState, type FormState } from "../inputs";
 import { SEVERITY_BAR, SEVERITY_TONE, Tag, btn, input, type Tone } from "../ui";
 import ScaleBar from "./ScaleBar";
+import { copyText, resultText, type CopyContext } from "../copy";
 
 const ORIGIN_TAG: Record<FieldState["origin"], { label: string; tone: Tone } | null> = {
   fhir: { label: "FHIR 기록", tone: "indigo" },
@@ -31,6 +32,7 @@ export default function CalculatorCard({
   overview,
   onResult,
   focusSeq,
+  copyContext = null,
 }: {
   spec: CalculatorSpec;
   overview: CalculatorOverview | undefined;
@@ -39,6 +41,8 @@ export default function CalculatorCard({
   onResult?: (id: string, result: Result | null, missing: string[]) => void;
   /** 요약 표에서 이 카드로 이동할 때마다 증가 - 입력 영역을 연다 */
   focusSeq?: number;
+  /** 결과 복사 텍스트의 기준 줄 (환자번호·조회 시각). 환자 없으면 null */
+  copyContext?: CopyContext | null;
 }) {
   const [form, setForm] = useState<FormState>(() => initialForm(spec, overview?.prefill));
   const [result, setResult] = useState<Result | null>(overview?.result ?? null);
@@ -47,6 +51,14 @@ export default function CalculatorCard({
   const [busy, setBusy] = useState(false);
   // 입력 영역은 기본 접힘. 자동 채움만으로 계산이 안 되는(입력이 필요한) 카드만 처음부터 연다.
   const [open, setOpen] = useState(() => !overview?.result);
+  const [copied, setCopied] = useState<"ok" | "fail" | null>(null);
+
+  async function copy() {
+    if (!result) return;
+    const ok = await copyText(resultText(spec, result, copyContext));
+    setCopied(ok ? "ok" : "fail");
+    window.setTimeout(() => setCopied(null), 1500);
+  }
   const dirty = useRef(false);
   const seq = useRef(0);
 
@@ -161,6 +173,9 @@ export default function CalculatorCard({
               </span>
               <Tag tone={SEVERITY_TONE[result.severity]}>{result.label}</Tag>
               {busy && <span className="text-[11px] text-gray-400">다시 계산 중…</span>}
+              <button type="button" className={`${btn.ghost} ml-auto`} onClick={copy} title="결과와 점수 구성을 텍스트로 복사">
+                {copied === "ok" ? "복사됨 ✓" : copied === "fail" ? "복사 실패" : "결과 복사"}
+              </button>
             </div>
             {spec.scale && <ScaleBar scale={spec.scale} value={result.value} unit={result.unit} />}
 

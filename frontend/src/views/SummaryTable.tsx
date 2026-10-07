@@ -1,6 +1,8 @@
 import type { CalculatorSpec, Result } from "../api";
 import { fmtNum } from "../format";
-import { SEVERITY_TONE, Tag, td, th } from "../ui";
+import { useState } from "react";
+import { copyText, summaryText, type CopyContext } from "../copy";
+import { SEVERITY_TONE, Tag, btn, td, th } from "../ui";
 
 export interface LiveResult {
   result: Result | null;
@@ -14,14 +16,24 @@ export default function SummaryTable({
   live,
   hasPatient,
   onJump,
+  copyContext = null,
 }: {
   specs: CalculatorSpec[];
   groups: { name: string; items: CalculatorSpec[] }[];
   live: Record<string, LiveResult>;
   hasPatient: boolean;
   onJump: (calcId: string) => void;
+  copyContext?: CopyContext | null;
 }) {
   const done = specs.filter((s) => live[s.id]?.result).length;
+  const [copied, setCopied] = useState<"ok" | "fail" | null>(null);
+
+  async function copyAll() {
+    const items = groups.flatMap((g) => g.items).flatMap((s) => (live[s.id]?.result ? [{ spec: s, result: live[s.id]!.result! }] : []));
+    const ok = await copyText(summaryText(items, copyContext));
+    setCopied(ok ? "ok" : "fail");
+    window.setTimeout(() => setCopied(null), 1500);
+  }
   return (
     <section className="rounded-lg border border-gray-200 bg-white">
       <div className="flex flex-wrap items-center justify-between gap-2 px-4 py-3">
@@ -33,9 +45,14 @@ export default function SummaryTable({
               : "환자를 불러오지 않았습니다. 각 그룹 탭에서 값을 직접 입력하면 여기에도 반영됩니다."}
           </p>
         </div>
-        <Tag tone={done === specs.length ? "green" : "gray"}>
-          계산 완료 {done}/{specs.length}
-        </Tag>
+        <div className="flex items-center gap-2">
+          <Tag tone={done === specs.length ? "green" : "gray"}>
+            계산 완료 {done}/{specs.length}
+          </Tag>
+          <button type="button" className={btn.secondary} onClick={copyAll} disabled={done === 0} title="계산된 결과를 한 줄씩 텍스트로 복사">
+            {copied === "ok" ? "복사됨 ✓" : copied === "fail" ? "복사 실패" : "전체 복사"}
+          </button>
+        </div>
       </div>
       <table className="w-full table-fixed border-t border-gray-100 sm:table-auto">
         <thead>

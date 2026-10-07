@@ -51,7 +51,8 @@ export default function PatientPanel({
 
   const s = overview.snapshot;
   const p = s.patient;
-  const presentFlags = Object.entries(s.flags).filter(([, f]) => f.present);
+  // cci_* 는 Charlson 카드 전용 세부 항목 - 패널 칩은 일반 플래그만
+  const presentFlags = Object.entries(s.flags).filter(([name, f]) => f.present && !name.startsWith("cci_"));
 
   return (
     <div className="space-y-3">
