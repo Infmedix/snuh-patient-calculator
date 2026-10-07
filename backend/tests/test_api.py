@@ -144,6 +144,25 @@ def test_overview_prefills_and_computes(client):
     assert "disease_severity" in n["missing"]
 
 
+def test_overview_second_fixture_patient_computes_icu_scores(client):
+    body = client.get("/api/patients/20000002/overview").json()
+    assert body["snapshot"]["patient"]["sex"] == "F" and body["snapshot"]["patient"]["age"] == 77
+    by_id = {c["id"]: c for c in body["calculators"]}
+    # CURB-65: BUN 24(1) RR 31(1) BP 102/58 → DBP ≤60(1) 77세(1) = 4
+    assert by_id["curb65"]["result"]["value"] == 4
+    # SOFA: FiO2 0.35 가 간호기록에 있어 계산됨 — PF 62/0.35=177, 호흡보조 없음 → 2, 나머지 0
+    assert by_id["sofa"]["result"]["value"] == 2
+    assert by_id["sofa"]["prefill"]["fio2"]["source"]["category"] == "clinical"
+    # APACHE II 도 계산됨 (FiO2 <0.5 → PaO2 62 → 1점 포함)
+    assert by_id["apache2"]["result"] is not None
+    assert by_id["apache2"]["result"]["extra"]["aps"]["oxygenation"] == 1
+    # CHA2DS2-VASc: 77세 여(2+1) + CHF(1) + HTN(1) = 5
+    assert by_id["cha2ds2_vasc"]["result"]["value"] == 5
+    # NRS-2002: 3개월 체중감소 51.5→48.0 = 6.8%(mild) 에 BMI 20.0 (<20.5) 이 겹쳐 moderate 제안
+    assert by_id["nrs2002"]["prefill"]["nutrition_status"]["value"] == "moderate"
+    assert by_id["nrs2002"]["prefill"]["weight_loss_3m_pct"]["value"] == pytest.approx(6.8, abs=0.05)
+
+
 def test_overview_marks_stale_values(client, monkeypatch):
     monkeypatch.setattr(settings, "STALE_AFTER_DAYS", 0)
     body = client.get("/api/patients/10000001/overview").json()
@@ -255,3 +274,23 @@ async def test_http_client_maps_401_without_leaking_token(monkeypatch):
     assert ei.value.status == 401
     assert "secret" not in ei.value.detail
     assert "토큰" in ei.value.detail
+
+
+# ===== .env =====
+
+def test_dotenv_fills_only_missing_keys(tmp_path, monkeypatch):
+    p = tmp_path / ".env"
+    p.write_text(
+        "\n".join(["# comment", "APP_TEST_A=mock", 'APP_TEST_B="quoted"', "export APP_TEST_C=x", "broken line", ""]),
+        encoding="utf-8",
+    )
+    monkeypatch.delenv("APP_TEST_A", raising=False)
+    monkeypatch.setenv("APP_TEST_B", "from-shell")
+    monkeypatch.delenv("APP_TEST_C", raising=False)
+    loaded = settings.load_dotenv(p)
+    assert loaded == ["APP_TEST_A", "APP_TEST_C"]
+    assert settings._env("APP_TEST_A") == "mock"
+    assert settings._env("APP_TEST_B") == "from-shell"     # 셸 값이 우선
+    assert settings._env("APP_TEST_C") == "x"
+    for k in ("APP_TEST_A", "APP_TEST_C"):
+        monkeypatch.delenv(k, raising=False)

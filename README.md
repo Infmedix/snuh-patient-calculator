@@ -87,6 +87,15 @@ FiO₂ 퍼센트 → 분율. 그 외 단위는 그대로 믿고 화면에 표시
 
 ### 로컬 개발 (mock 데이터, snuh-fhir 불필요)
 
+**먼저 `.env` 를 만든다.** 저장소 루트의 `.env` 를 백엔드가 기동 시 자동으로 읽는다 (셸에서 직접 지정한 값이 우선).
+`.env` 없이 띄우면 기본 `APP_FHIR_MODE=http` 로 `localhost:8000` 의 snuh-fhir 에 붙으려다 **502** 가 난다.
+
+```bash
+cp .env.example .env
+# .env 에서 아래 한 줄만 바꾼다
+#   APP_FHIR_MODE=mock
+```
+
 ```bash
 # 백엔드 — uv (Python 3.11+)
 cd backend
@@ -99,7 +108,14 @@ npm ci
 VITE_API_PROXY=http://localhost:8010 npm run dev     # http://localhost:5174
 ```
 
-mock 환자: `10000001` (`backend/fixtures/patients/10000001.json`). 새 환자를 추가하려면 같은 형식(Bundle collection)의 파일을 넣는다.
+mock 환자 (`backend/fixtures/patients/`):
+
+| 환자번호 | 프로필 | 보여주는 것 |
+| --- | --- | --- |
+| `10000001` | 68세 남, 간경변·CKD·AF·뇌경색 병력, Cr 1.8 | Child-Pugh B · MELD-Na · CHA₂DS₂-VASc 5 · HAS-BLED 4. FiO₂ 가 없어 SOFA/APACHE II 는 「입력 필요」 |
+| `20000002` | 77세 여, 폐렴·CHF·AF·COPD, FiO₂ 0.35 산소요법 | CURB-65 4 · SOFA·APACHE II 자동 계산 · 3개월 체중감소 6.8% → NRS 제안 |
+
+새 환자를 추가하려면 같은 형식(Bundle collection, Patient·Observation·Condition)의 파일을 넣는다 — 서버 재시작 불필요.
 
 ### Docker (운영)
 

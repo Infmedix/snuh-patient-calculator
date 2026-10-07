@@ -14,6 +14,40 @@ from typing import Optional
 logger = logging.getLogger(__name__)
 
 _BACKEND_DIR = Path(__file__).resolve().parent.parent
+_REPO_DIR = _BACKEND_DIR.parent
+
+
+def load_dotenv(path: Optional[Path] = None) -> list[str]:
+    """저장소 루트(또는 backend/)의 `.env` 를 읽어 **아직 없는** 환경변수만 채운다.
+
+    docker compose 는 env_file 로 넣어 주지만 로컬 `uv run uvicorn` 은 아무것도 읽지 않아
+    APP_FHIR_MODE=mock 을 빠뜨리면 snuh-fhir(localhost:8000) 접속 실패로 502 가 난다 — 그 함정 제거.
+    셸에서 직접 지정한 값이 항상 우선한다. 형식: `KEY=value`, `#` 주석, 따옴표 허용. 외부 의존성 없음.
+    """
+    candidates = [path] if path else [_REPO_DIR / ".env", _BACKEND_DIR / ".env"]
+    loaded: list[str] = []
+    for p in candidates:
+        if p is None or not p.is_file():
+            continue
+        for raw in p.read_text(encoding="utf-8").splitlines():
+            line = raw.strip()
+            if not line or line.startswith("#") or "=" not in line:
+                continue
+            key, _, value = line.partition("=")
+            key = key.strip()
+            if key.startswith("export "):
+                key = key[7:].strip()
+            value = value.strip()
+            if len(value) >= 2 and value[0] == value[-1] and value[0] in "\"'":
+                value = value[1:-1]
+            if key and key not in os.environ:
+                os.environ[key] = value
+                loaded.append(key)
+        break
+    return loaded
+
+
+_DOTENV_LOADED = load_dotenv()
 
 
 def _env(name: str) -> Optional[str]:

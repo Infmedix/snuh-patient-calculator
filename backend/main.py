@@ -35,6 +35,8 @@ async def lifespan(app: FastAPI):
         raise RuntimeError("invalid APP_FHIR_MODE")
     if settings.FHIR_MODE == "http" and not settings.FHIR_TOKEN:
         logging.warning("[Lifespan] APP_FHIR_TOKEN 미설정 — 요청마다 X-Fhir-Token 헤더가 없으면 FHIR 호출이 401 입니다")
+    if settings._DOTENV_LOADED:
+        logging.info("[Lifespan] .env 적용: %s", ", ".join(settings._DOTENV_LOADED))
     logging.info("[Lifespan] FHIR source: %s", dependencies.describe_source())
     logging.info("[Lifespan] Calculators: %s", ", ".join(s.id for s in calculators.all_specs()))
     vm = current_variables()
