@@ -30,3 +30,9 @@ frontend/dist/
 
 # Playwright MCP 산출물
 .playwright-mcp/
+
+# 이미지 tar·매니페스트 zip 산출물 (deploy/build-and-save.sh)
+dist/
+
+# 테스트 서버 config.env 에 합쳐지는 비밀값 (deploy/upload-testbed.sh)
+deploy/argo/secrets.env

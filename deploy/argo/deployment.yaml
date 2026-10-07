@@ -1,0 +1,44 @@
+# snuh-patient-calculator — 환자 정보 기반 수치 계산기 (FastAPI + 정적 프런트, port 8000).
+#
+# 데이터는 같은 ns 의 snuh-fhir-web Service 로만 가져온다 (ODS 직접 접근 없음) → 노드 제약 없음.
+# 외부 노출: apps 플랫폼의 **프록시 env** 가 /apps/runtime/snuh-patient-calculator/ 를 이 Service 로 넘긴다
+#   (snuh-fhir-web 과 같은 방식, deploy/README.md). app-gateway 가 포털 로그인(parent_gateway)을 검사한다.
+#   ★ IngressRoute 로 직접 노출하지 말 것 — 게이트웨이 SSO 경계를 우회한다 (APP_DEPLOY_GUIDE §6).
+# 상태 저장 없음(PVC 없음). FHIR 호출 자격은 config.env 의 서비스 계정 PAT(APP_FHIR_TOKEN). 비어 있으면 사용자 본인 PAT(화면 등록) 로 동작.
+apiVersion: apps/v1
+kind: Deployment
+metadata: {name: snuh-patient-calculator, labels: {app: snuh-patient-calculator}}
+spec:
+  replicas: 1
+  revisionHistoryLimit: 2
+  strategy:
+    type: RollingUpdate
+    rollingUpdate: {maxSurge: 1, maxUnavailable: 0}
+  selector: {matchLabels: {app: snuh-patient-calculator}}
+  template:
+    metadata: {labels: {app: snuh-patient-calculator}}
+    spec:
+      containers:
+        - name: snuh-patient-calculator
+          image: registry.internal/airgap/snuh-patient-calculator:latest   # 태그는 kustomization newTag 가 덮음
+          imagePullPolicy: IfNotPresent
+          envFrom:
+            - configMapRef: {name: snuh-patient-calculator-config}
+          ports: [{containerPort: 8000}]
+          # 프로브 경로는 prefix 없이 — PrefixAliasMiddleware 가 prefix 유무 모두 받는다.
+          # 두 프로브 모두 /api/health (프로세스 생존만). readiness 를 snuh-fhir-web 왕복(/api/health/ready)에 걸면
+          # fhir 가 내려간 동안 Service 엔드포인트가 비어 게이트웨이가 502(upstream unreachable)를 내고 화면조차 안 뜬다 —
+          # fhir 장애는 화면의 「FHIR 연결 불가」 태그와 조회 오류로 보여 주는 편이 낫다.
+          livenessProbe:
+            httpGet: {path: /api/health, port: 8000}
+            initialDelaySeconds: 5
+            periodSeconds: 30
+            timeoutSeconds: 5
+          readinessProbe:
+            httpGet: {path: /api/health, port: 8000}
+            initialDelaySeconds: 3
+            periodSeconds: 10
+            timeoutSeconds: 5
+          resources:
+            requests: {cpu: 100m, memory: 128Mi}
+            limits: {memory: 512Mi}
