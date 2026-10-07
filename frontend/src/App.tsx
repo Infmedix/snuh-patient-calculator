@@ -11,6 +11,7 @@ import {
   type Overview,
   type Result,
 } from "./api";
+import { getFavorites, sortFavoritesFirst, toggleFavorite } from "./favorites";
 import { clearPat, getPat, maskPat, setPat } from "./pat";
 import { ErrorBox, Tag, btn, input } from "./ui";
 import CalculatorCard from "./views/CalculatorCard";
@@ -40,6 +41,9 @@ export default function App() {
   const [live, setLive] = useState<Record<string, LiveResult>>({});
   // 요약 표 → 카드 이동 요청 (카드 id 별 증가 카운터 - 같은 카드를 다시 눌러도 열리게)
   const [focus, setFocus] = useState<Record<string, number>>({});
+  const [favorites, setFavoritesState] = useState<string[]>(() => getFavorites());
+  // 딥링크 `#/p/{환자}/{계산기}` - 환자 로드가 끝난 뒤 그 카드로 이동
+  const pendingCalc = useRef<string | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   // PAT (B 방식: 사용자 본인 토큰). mock 모드에서는 필요 없다.
   const [pat, setPatState] = useState<string | null>(() => getPat());
@@ -77,6 +81,11 @@ export default function App() {
       setEpoch((n) => n + 1);
       setTab(SUMMARY_TAB);
       window.location.hash = `#/p/${encodeURIComponent(id)}`;
+      if (pendingCalc.current) {
+        const target = pendingCalc.current;
+        pendingCalc.current = null;
+        window.setTimeout(() => jumpToRef.current?.(target), 0);
+      }
     } catch (e) {
       if (e instanceof ApiError && e.code?.startsWith("pat_")) {
         // 토큰 문제는 일반 오류 상자 대신 PAT 패널에서 안내한다
@@ -96,11 +105,16 @@ export default function App() {
 
   // `#/p/{환자번호}` 딥링크 - 새로고침·공유 시 같은 환자를 다시 불러온다
   useEffect(() => {
-    const m = /^#\/p\/(.+)$/.exec(window.location.hash);
+    const m = /^#\/p\/([^/]+)(?:\/([^/]+))?$/.exec(window.location.hash);
     if (m) {
       const id = decodeURIComponent(m[1]);
+      if (m[2]) pendingCalc.current = decodeURIComponent(m[2]);
       setDraft(id);
       void loadPatient(id);
+    } else {
+      // 환자 없이 계산기 하나만: `#/c/{계산기}`
+      const c = /^#\/c\/([^/]+)$/.exec(window.location.hash);
+      if (c) pendingCalc.current = decodeURIComponent(c[1]);
     }
   }, [loadPatient]);
 
@@ -171,13 +185,32 @@ export default function App() {
     document.title = overview ? `${overview.snapshot.patient.id} - 환자 계산기` : "환자 계산기 - SNUH";
   }, [overview]);
 
+  const jumpToRef = useRef<(calcId: string) => void>(() => {});
   function jumpTo(calcId: string) {
     const spec = specs?.items.find((s) => s.id === calcId);
     if (!spec) return;
     setTab(spec.group);
     setFocus((f) => ({ ...f, [calcId]: (f[calcId] ?? 0) + 1 }));
+    // 딥링크 유지: 환자가 있으면 #/p/{환자}/{계산기}, 없으면 #/c/{계산기}
+    const pid = overview?.snapshot.patient.id;
+    window.history.replaceState(null, "", pid ? `#/p/${encodeURIComponent(pid)}/${calcId}` : `#/c/${calcId}`);
     // 탭이 그려진 뒤 카드로 스크롤
     window.setTimeout(() => document.getElementById(`calc-${calcId}`)?.scrollIntoView({ behavior: "smooth", block: "start" }), 50);
+  }
+  jumpToRef.current = jumpTo;
+
+  // 환자 없이 `#/c/{계산기}` 로 들어온 경우 - 스펙이 도착하면 이동
+  useEffect(() => {
+    if (specs && !overview && pendingCalc.current) {
+      const target = pendingCalc.current;
+      pendingCalc.current = null;
+      window.setTimeout(() => jumpTo(target), 0);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [specs]);
+
+  function onToggleFavorite(id: string) {
+    setFavoritesState(toggleFavorite(id));
   }
 
   const tabCls = (active: boolean) =>
@@ -295,13 +328,15 @@ export default function App() {
                     hasPatient={!!overview}
                     onJump={jumpTo}
                     copyContext={overview ? { patientId: overview.snapshot.patient.id, fetchedAt: overview.snapshot.fetched_at } : null}
+                    favorites={favorites}
+                    onToggleFavorite={onToggleFavorite}
                   />
                 </div>
 
                 {groups.map((g) => (
                   <div key={g.name} hidden={tab !== g.name}>
                     <div className="space-y-4">
-                      {g.items.map((spec) => (
+                      {sortFavoritesFirst(g.items, favorites).map((spec) => (
                         <CalculatorCard
                           key={`${spec.id}:${epoch}`}
                           spec={spec}
@@ -310,6 +345,8 @@ export default function App() {
                           onResult={onResult}
                           focusSeq={focus[spec.id] ?? 0}
                           copyContext={overview ? { patientId: overview.snapshot.patient.id, fetchedAt: overview.snapshot.fetched_at } : null}
+                          favorite={favorites.includes(spec.id)}
+                          onToggleFavorite={() => onToggleFavorite(spec.id)}
                         />
                       ))}
                     </div>

@@ -33,6 +33,8 @@ export default function CalculatorCard({
   onResult,
   focusSeq,
   copyContext = null,
+  favorite = false,
+  onToggleFavorite,
 }: {
   spec: CalculatorSpec;
   overview: CalculatorOverview | undefined;
@@ -43,6 +45,8 @@ export default function CalculatorCard({
   focusSeq?: number;
   /** 결과 복사 텍스트의 기준 줄 (환자번호·조회 시각). 환자 없으면 null */
   copyContext?: CopyContext | null;
+  favorite?: boolean;
+  onToggleFavorite?: () => void;
 }) {
   const [form, setForm] = useState<FormState>(() => initialForm(spec, overview?.prefill));
   const [result, setResult] = useState<Result | null>(overview?.result ?? null);
@@ -136,7 +140,21 @@ export default function CalculatorCard({
       {/* ---------- 머리 ---------- */}
       <header className="flex flex-col gap-3 px-4 pt-4 sm:flex-row sm:items-start sm:gap-4 sm:px-5">
         <div className="min-w-0 flex-1">
-          <h3 className="text-base font-semibold text-gray-900">{spec.name}</h3>
+          <h3 className="flex items-center gap-1.5 text-base font-semibold text-gray-900">
+            {onToggleFavorite && (
+              <button
+                type="button"
+                className={`text-lg leading-none ${favorite ? "text-amber-500" : "text-gray-300 hover:text-amber-400"}`}
+                onClick={onToggleFavorite}
+                aria-label={favorite ? "내 계산기에서 빼기" : "내 계산기에 추가"}
+                aria-pressed={favorite}
+                title="별표: 요약 탭 「내 계산기」에 고정"
+              >
+                {favorite ? "★" : "☆"}
+              </button>
+            )}
+            {spec.name}
+          </h3>
           <p className="text-sm text-gray-600">{spec.description}</p>
           {spec.guide && <p className="mt-1 max-w-3xl text-xs leading-relaxed text-gray-500">{spec.guide}</p>}
           <p className="mt-1.5 text-[11px] text-gray-400">
