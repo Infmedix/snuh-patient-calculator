@@ -1,5 +1,5 @@
 /**
- * API 클라이언트 — 백엔드 `/api/*`.
+ * API 클라이언트 - 백엔드 `/api/*`.
  *
  * 경로 규칙 (snuh-fhir 와 동일): 프런트는 `/ui/` 아래에 서빙되고 공개 URL 에는 배포 prefix 가 붙으므로
  * API 는 절대 경로가 아니라 **문서 기준 상대 경로**(`../api/...`)로 부른다. vite dev 는 `/` 에서 서빙되므로
@@ -211,7 +211,7 @@ export async function fetchOverview(patientId: string, pat: string | null = null
   );
 }
 
-/** snuh-fhir 「내 토큰」 화면 — 계산기와 같은 gateway 아래(/apps/runtime/fhir/ui/)에 있다고 가정해 문서 기준으로 푼다. */
+/** snuh-fhir 「내 토큰」 화면 - 계산기와 같은 gateway 아래(/apps/runtime/fhir/ui/)에 있다고 가정해 문서 기준으로 푼다. */
 export function fhirTokenPageUrl(base?: string): string | null {
   const b = base ?? (typeof document !== "undefined" ? document.baseURI : null);
   if (!b) return null;

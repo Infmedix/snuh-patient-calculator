@@ -1,12 +1,12 @@
-"""NRS-2002 — Nutritional Risk Screening (Kondrup J et al. Clin Nutr 2003;22:321-36, ESPEN).
+"""NRS-2002 - Nutritional Risk Screening (Kondrup J et al. Clin Nutr 2003;22:321-36, ESPEN).
 
-최종 스크리닝 = 영양상태 손상(0–3) + 질병 중증도(0–3) + 70세 이상 1.  ≥3 영양 위험 → 영양 치료 계획.
-영양상태: 1 경도 — 3개월 체중감소 >5% 또는 지난주 섭취 50–75%
-          2 중등도 — 2개월 체중감소 >5% 또는 BMI 18.5–20.5 + 전신상태 저하 또는 섭취 25–50%
-          3 중증 — 1개월 체중감소 >5% (3개월 >15%) 또는 BMI <18.5 + 전신상태 저하 또는 섭취 0–25%
-질병 중증도: 1 경도 — 고관절 골절, 급성 합병증 동반 만성질환(간경변·COPD·투석·당뇨·종양)
-             2 중등도 — 대복부 수술, 뇌졸중, 중증 폐렴, 혈액암
-             3 중증 — 두부 손상, 골수이식, 중환자(APACHE >10)
+최종 스크리닝 = 영양상태 손상(0-3) + 질병 중증도(0-3) + 70세 이상 1.  ≥3 영양 위험 → 영양 치료 계획.
+영양상태: 1 경도 - 3개월 체중감소 >5% 또는 지난주 섭취 50-75%
+          2 중등도 - 2개월 체중감소 >5% 또는 BMI 18.5-20.5 + 전신상태 저하 또는 섭취 25-50%
+          3 중증 - 1개월 체중감소 >5% (3개월 >15%) 또는 BMI <18.5 + 전신상태 저하 또는 섭취 0-25%
+질병 중증도: 1 경도 - 고관절 골절, 급성 합병증 동반 만성질환(간경변·COPD·투석·당뇨·종양)
+             2 중등도 - 대복부 수술, 뇌졸중, 중증 폐렴, 혈액암
+             3 중증 - 두부 손상, 골수이식, 중환자(APACHE >10)
 체중 이력이 있으면 체중감소율·BMI 로 영양상태를 **제안**하고, 섭취량·전신상태는 사용자가 반영한다.
 """
 
@@ -74,10 +74,10 @@ def derive_nutrition_status(s: Snapshot) -> Optional[Derived]:
         if bmi < 18.5 and level != "severe":
             level, reasons = "severe", reasons + [f"BMI {bmi:.1f} <18.5 (전신상태 저하 동반 시)"]
         elif bmi < 20.5 and level in ("absent", "mild"):
-            level, reasons = "moderate", reasons + [f"BMI {bmi:.1f} 18.5–20.5 (전신상태 저하 동반 시)"]
+            level, reasons = "moderate", reasons + [f"BMI {bmi:.1f} 18.5-20.5 (전신상태 저하 동반 시)"]
     if not reasons and bmi is None and not any(losses.values()):
         return None
-    src = "제안: " + (", ".join(reasons) if reasons else "체중 변화·BMI 이상 없음") + " — 섭취량 감소는 반영되지 않음"
+    src = "제안: " + (", ".join(reasons) if reasons else "체중 변화·BMI 이상 없음") + " - 섭취량 감소는 반영되지 않음"
     return Derived(level, src, w.observed_at if w else None)
 
 
@@ -92,9 +92,9 @@ def compute(i: dict) -> Result:
     a = 1 if i["age"] >= 70 else 0
     total = n + d + a
     if total >= 3:
-        label, sev = "영양 위험 — 영양 치료 계획 수립", "danger"
+        label, sev = "영양 위험 - 영양 치료 계획 수립", "danger"
     else:
-        label, sev = "위험 낮음 — 매주 재스크리닝", "ok"
+        label, sev = "위험 낮음 - 매주 재스크리닝", "ok"
     details = [
         Detail("영양상태 손상", next(o.label for o in NUTRITION if o.value == i["nutrition_status"]), n),
         Detail("질병 중증도", next(o.label for o in SEVERITY if o.value == i["disease_severity"]), d),

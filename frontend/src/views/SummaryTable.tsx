@@ -7,7 +7,7 @@ export interface LiveResult {
   missing: string[];
 }
 
-/** 요약 탭 — 12개 계산기의 현재 결과를 한 표로. 행을 누르면 해당 그룹 탭의 카드로 이동. */
+/** 요약 탭 - 12개 계산기의 현재 결과를 한 표로. 행을 누르면 해당 그룹 탭의 카드로 이동. */
 export default function SummaryTable({
   specs,
   groups,
@@ -72,7 +72,7 @@ export default function SummaryTable({
                         {res.unit && <span className="ml-1 text-xs text-gray-500">{res.unit}</span>}
                       </>
                     ) : (
-                      <span className="text-gray-300">—</span>
+                      <span className="text-gray-300">-</span>
                     )}
                   </td>
                   <td className={td}>

@@ -9,8 +9,8 @@ const SEG: Record<Severity, { base: string; active: string }> = {
 };
 
 /**
- * 결과 구간 막대 — min~max 를 bands 로 나눠 그리고 현재 값 위치를 표시한다.
- * 구간 경계·눈금·화살표가 모두 같은 비례 좌표(백분율)를 쓴다 — 눈금을 균등 배치하면 화살표와 어긋나 보인다.
+ * 결과 구간 막대 - min~max 를 bands 로 나눠 그리고 현재 값 위치를 표시한다.
+ * 구간 경계·눈금·화살표가 모두 같은 비례 좌표(백분율)를 쓴다 - 눈금을 균등 배치하면 화살표와 어긋나 보인다.
  */
 export default function ScaleBar({ scale, value, unit }: { scale: Scale; value: number | null; unit: string | null }) {
   const span = scale.max - scale.min;
@@ -36,7 +36,7 @@ export default function ScaleBar({ scale, value, unit }: { scale: Scale; value: 
 
   return (
     <div className="mt-3">
-      {/* 화살표 + 값 — 꼭짓점이 정확히 pos 에 오도록 마커 자체를 가운데 정렬 */}
+      {/* 화살표 + 값 - 꼭짓점이 정확히 pos 에 오도록 마커 자체를 가운데 정렬 */}
       <div className="relative h-5">
         {pos !== null && (
           <div className="absolute bottom-0 flex -translate-x-1/2 flex-col items-center" style={{ left: `${pos}%` }}>
@@ -60,12 +60,12 @@ export default function ScaleBar({ scale, value, unit }: { scale: Scale; value: 
             key={i}
             className={`${i === activeIdx ? SEG[s.band.severity].active : SEG[s.band.severity].base} border-r border-white last:border-r-0`}
             style={{ width: `${s.width}%` }}
-            title={`${s.band.label}: ${fmtNum(s.from, 1)} – ${s.band.upto === null ? "" : fmtNum(s.to, 1)}`}
+            title={`${s.band.label}: ${fmtNum(s.from, 1)} - ${s.band.upto === null ? "" : fmtNum(s.to, 1)}`}
           />
         ))}
       </div>
 
-      {/* 구간 이름 — 구간 너비에 맞춰 */}
+      {/* 구간 이름 - 구간 너비에 맞춰 */}
       <div className="mt-1 flex w-full">
         {segs.map((s, i) => (
           <div
@@ -79,7 +79,7 @@ export default function ScaleBar({ scale, value, unit }: { scale: Scale; value: 
         ))}
       </div>
 
-      {/* 눈금 — 구간 경계 위치에 정확히 */}
+      {/* 눈금 - 구간 경계 위치에 정확히 */}
       <div className="relative mt-0.5 h-3.5">
         {ticks.map((t, i) => (
           <span

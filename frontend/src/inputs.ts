@@ -1,5 +1,5 @@
 /**
- * 계산기 입력 상태 — 자동 채움(prefill)과 사용자 수정을 합치는 순수 로직. 화면 코드와 분리해 테스트한다.
+ * 계산기 입력 상태 - 자동 채움(prefill)과 사용자 수정을 합치는 순수 로직. 화면 코드와 분리해 테스트한다.
  *
  * 필드 하나의 상태 = 값(문자열 또는 참/거짓) + 출처(origin). 출처는 태그로 그려진다:
  *   fhir(검사·활력징후·심전도) · derived(계산·추정) · condition(진단 코드) · default(스펙 기본값) · manual(사용자 입력) · empty
@@ -49,7 +49,7 @@ function toFieldValue(spec: InputSpec, v: unknown): string | boolean {
   return v === null || v === undefined ? "" : String(v);
 }
 
-/** 사용자 수정 — 출처를 manual 로 바꾼다. 빈 문자열로 지우면 empty. */
+/** 사용자 수정 - 출처를 manual 로 바꾼다. 빈 문자열로 지우면 empty. */
 export function setField(form: FormState, key: string, value: string | boolean): FormState {
   const origin: Origin = value === "" ? "empty" : "manual";
   return { ...form, [key]: { value, origin, source: null } };
@@ -75,7 +75,7 @@ export function toPayload(spec: CalculatorSpec, form: FormState): Record<string,
   return out;
 }
 
-/** 필수인데 비어 있는 키 — 서버 왕복 전에 「입력 필요」 표시용. */
+/** 필수인데 비어 있는 키 - 서버 왕복 전에 「입력 필요」 표시용. */
 export function missingRequired(spec: CalculatorSpec, form: FormState): string[] {
   return spec.inputs
     .filter((i) => i.required && i.type !== "boolean")
@@ -83,7 +83,7 @@ export function missingRequired(spec: CalculatorSpec, form: FormState): string[]
     .map((i) => i.key);
 }
 
-/** 자동 채움(비수동) 필드 수 — 카드 머리의 「자동 n/m」 표시. */
+/** 자동 채움(비수동) 필드 수 - 카드 머리의 「자동 n/m」 표시. */
 export function autoCount(form: FormState): { auto: number; total: number } {
   const states = Object.values(form);
   return { auto: states.filter((f) => f.origin === "fhir" || f.origin === "patient" || f.origin === "derived" || f.origin === "condition").length, total: states.length };

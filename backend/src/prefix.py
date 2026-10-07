@@ -1,4 +1,4 @@
-"""배포 prefix 수용 ASGI 미들웨어 — snuh-fhir `src/prefix.py` 이식 (auth-9 #76).
+"""배포 prefix 수용 ASGI 미들웨어 - snuh-fhir `src/prefix.py` 이식 (auth-9 #76).
 
 gateway 가 prefix 를 strip 하는 배치와 하지 않는 배치 양쪽에서 동작한다: `scope["path"]` 에 prefix 를
 보장하고 `scope["root_path"]` 를 prefix 로 둔다 (Starlette 라우팅은 path 에서 root_path 를 떼어 매칭).

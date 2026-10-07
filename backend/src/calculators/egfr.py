@@ -1,9 +1,9 @@
-"""eGFR — CKD-EPI 2021 크레아티닌 식 (인종 변수 없음).
+"""eGFR - CKD-EPI 2021 크레아티닌 식 (인종 변수 없음).
 
 eGFR = 142 × min(Scr/κ, 1)^α × max(Scr/κ, 1)^−1.200 × 0.9938^Age × 1.012 [여성]
   κ = 0.7(여) / 0.9(남), α = −0.241(여) / −0.302(남)
 Inker LA et al. N Engl J Med 2021;385:1737-49.
-KDIGO 2012 분류: G1 ≥90, G2 60–89, G3a 45–59, G3b 30–44, G4 15–29, G5 <15.
+KDIGO 2012 분류: G1 ≥90, G2 60-89, G3a 45-59, G3b 30-44, G4 15-29, G5 <15.
 """
 
 from __future__ import annotations
@@ -12,12 +12,12 @@ from src.calculators.base import Band, CalculatorSpec, Detail, InputSpec, Result
 from src.calculators.common import age_input, sex_input
 
 STAGES = (
-    (90, "G1 — 정상 또는 높음", "ok"),
-    (60, "G2 — 경도 감소", "ok"),
-    (45, "G3a — 경도~중등도 감소", "warn"),
-    (30, "G3b — 중등도~중증 감소", "warn"),
-    (15, "G4 — 중증 감소", "danger"),
-    (0, "G5 — 신부전", "danger"),
+    (90, "G1 - 정상 또는 높음", "ok"),
+    (60, "G2 - 경도 감소", "ok"),
+    (45, "G3a - 경도~중등도 감소", "warn"),
+    (30, "G3b - 중등도~중증 감소", "warn"),
+    (15, "G4 - 중증 감소", "danger"),
+    (0, "G5 - 신부전", "danger"),
 )
 
 
@@ -48,7 +48,7 @@ def compute(i: dict) -> Result:
 
 SPEC = register(CalculatorSpec(
     id="egfr", name="eGFR (CKD-EPI 2021)", group="신체·신장",
-    description="추정 사구체여과율 — 신장 기능 평가",
+    description="추정 사구체여과율 - 신장 기능 평가",
     inputs=(
         InputSpec("creatinine", "혈청 크레아티닌", "number", unit="mg/dL", minimum=0.1, maximum=50, variable="creatinine"),
         age_input(),

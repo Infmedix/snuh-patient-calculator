@@ -1,12 +1,12 @@
-"""SOFA — Sequential Organ Failure Assessment (Vincent JL et al. Intensive Care Med 1996;22:707-10).
+"""SOFA - Sequential Organ Failure Assessment (Vincent JL et al. Intensive Care Med 1996;22:707-10).
 
 호흡 PaO₂/FiO₂: ≥400 0 · <400 1 · <300 2 · <200 + 호흡 보조 3 · <100 + 호흡 보조 4
 응고 혈소판(×10³/µL): ≥150 0 · <150 1 · <100 2 · <50 3 · <20 4
-간 빌리루빈(mg/dL): <1.2 0 · 1.2–1.9 1 · 2.0–5.9 2 · 6.0–11.9 3 · ≥12 4
+간 빌리루빈(mg/dL): <1.2 0 · 1.2-1.9 1 · 2.0-5.9 2 · 6.0-11.9 3 · ≥12 4
 심혈관: MAP ≥70 0 · MAP <70 1 · dopamine ≤5 또는 dobutamine 2 · dopamine >5 또는 epi/norepi ≤0.1 3 ·
         dopamine >15 또는 epi/norepi >0.1 4  (µg/kg/min, ≥1시간)
-중추신경 GCS: 15 0 · 13–14 1 · 10–12 2 · 6–9 3 · <6 4
-신장 Cr(mg/dL): <1.2 0 · 1.2–1.9 1 · 2.0–3.4 2 · 3.5–4.9 또는 소변량 <500 mL/일 3 · ≥5.0 또는 <200 4
+중추신경 GCS: 15 0 · 13-14 1 · 10-12 2 · 6-9 3 · <6 4
+신장 Cr(mg/dL): <1.2 0 · 1.2-1.9 1 · 2.0-3.4 2 · 3.5-4.9 또는 소변량 <500 mL/일 3 · ≥5.0 또는 <200 4
 """
 
 from __future__ import annotations
@@ -22,11 +22,11 @@ VASOPRESSOR = (
 )
 VASO_PTS = {"none": 0, "dopamine_le5_or_dobutamine": 2, "dopamine_gt5_or_epi_le0_1": 3, "dopamine_gt15_or_epi_gt0_1": 4}
 
-MORTALITY = ((6, "<10%"), (9, "15–20%"), (12, "40–50%"), (14, "50–60%"), (15, ">80%"), (24, ">90%"))
+MORTALITY = ((6, "<10%"), (9, "15-20%"), (12, "40-50%"), (14, "50-60%"), (15, ">80%"), (24, ">90%"))
 
 
 def normalize_fio2(fio2: float) -> float:
-    """0.21–1.0 분율. 1 초과(퍼센트 입력)는 /100."""
+    """0.21-1.0 분율. 1 초과(퍼센트 입력)는 /100."""
     return fio2 / 100 if fio2 > 1 else fio2
 
 
@@ -117,7 +117,7 @@ SPEC = register(CalculatorSpec(
     description="장기 기능부전 / 중증도 평가",
     inputs=(
         InputSpec("pao2", "PaO₂", "number", unit="mmHg", minimum=10, maximum=700, variable="pao2"),
-        InputSpec("fio2", "FiO₂", "number", unit="분율(0.21–1.0)", minimum=0.21, maximum=100, variable="fio2",
+        InputSpec("fio2", "FiO₂", "number", unit="분율(0.21-1.0)", minimum=0.21, maximum=100, variable="fio2",
                   help="퍼센트로 입력해도 됩니다 (예: 40 → 0.40)"),
         InputSpec("mechanical_ventilation", "기계환기 / 호흡 보조 중", "boolean", default=False),
         InputSpec("platelets", "혈소판", "number", unit="×10³/µL", minimum=0, maximum=3000, variable="platelets"),

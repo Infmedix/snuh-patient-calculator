@@ -1,4 +1,4 @@
-"""liveness / readiness. liveness 는 외부 왕복 없음 — FHIR 장애가 재시작 루프가 되면 안 된다."""
+"""liveness / readiness. liveness 는 외부 왕복 없음 - FHIR 장애가 재시작 루프가 되면 안 된다."""
 
 from __future__ import annotations
 
@@ -30,7 +30,7 @@ async def readiness(response: Response) -> dict:
         await make_client().get("health")
         return {"status": "ok", "fhir": "ok", "token": token}
     except FhirError as e:
-        logger.warning("[Health] readiness 실패 — FHIR %s %s", e.status, e.detail)
+        logger.warning("[Health] readiness 실패 - FHIR %s %s", e.status, e.detail)
         response.status_code = 503
         return {"status": "unavailable", "fhir": "error", "detail": e.detail,
                 "token": "service" if settings.FHIR_TOKEN else "none"}

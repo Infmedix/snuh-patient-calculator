@@ -1,4 +1,4 @@
-/** 화면 공통 소품 — snuh-fhir ui.tsx 이식. 외부 UI 라이브러리 없이 Tailwind 만 쓴다. */
+/** 화면 공통 소품 - snuh-fhir ui.tsx 이식. 외부 UI 라이브러리 없이 Tailwind 만 쓴다. */
 import type { ReactNode } from "react";
 import type { Severity } from "./api";
 

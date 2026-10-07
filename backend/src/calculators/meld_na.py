@@ -1,9 +1,9 @@
-"""MELD-Na — 말기 간질환 중증도 (UNOS/OPTN 2016 정책 식).
+"""MELD-Na - 말기 간질환 중증도 (UNOS/OPTN 2016 정책 식).
 
 MELD(i) = 0.957·ln(Cr) + 0.378·ln(bilirubin) + 1.120·ln(INR) + 0.643 → 소수 첫째 자리로 반올림 후 ×10
   (각 값 <1 → 1, Cr >4 → 4, 지난 7일 투석 ≥2회 또는 24h CVVHD → Cr 4)
-MELD(i) >11 이면 MELD = MELD(i) + 1.32·(137 − Na) − 0.033·MELD(i)·(137 − Na), Na 는 125–137 로 제한.
-최종 정수 반올림, 6–40.  Kamath PS et al. Hepatology 2001;33:464-70; Kim WR et al. NEJM 2008;359:1018-26.
+MELD(i) >11 이면 MELD = MELD(i) + 1.32·(137 − Na) − 0.033·MELD(i)·(137 − Na), Na 는 125-137 로 제한.
+최종 정수 반올림, 6-40.  Kamath PS et al. Hepatology 2001;33:464-70; Kim WR et al. NEJM 2008;359:1018-26.
 """
 
 from __future__ import annotations
@@ -47,11 +47,11 @@ def compute(i: dict) -> Result:
     else:
         label, sev = "매우 높음", "danger"
     notes = [f"3개월 사망률 참고 {mort} (Wiesner 2003 MELD 구간).",
-             "Cr >4 또는 투석은 4 로, 각 값 <1 은 1 로 제한하며 Na 는 125–137 로 제한합니다 (UNOS 2016)."]
+             "Cr >4 또는 투석은 4 로, 각 값 <1 은 1 로 제한하며 Na 는 125-137 로 제한합니다 (UNOS 2016)."]
     if mi <= 11:
         notes.append("MELD(i) ≤11 이라 나트륨 보정을 적용하지 않습니다.")
     return Result(
-        value=score, unit="점", label=f"MELD-Na {score} — 사망 위험 {label}", severity=sev,
+        value=score, unit="점", label=f"MELD-Na {score} - 사망 위험 {label}", severity=sev,
         details=[
             Detail("크레아티닌", f"{i['creatinine']:g} mg/dL" + (" (투석 → 4.0 적용)" if i["dialysis"] else "")),
             Detail("총 빌리루빈", f"{i['bilirubin_total']:g} mg/dL"),

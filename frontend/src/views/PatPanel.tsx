@@ -3,7 +3,7 @@ import { looksLikePat, maskPat } from "../pat";
 import { Tag, btn, input } from "../ui";
 
 /**
- * PAT 등록 패널 — snuh-fhir 「API 테스터」의 PAT 패널과 같은 규칙.
+ * PAT 등록 패널 - snuh-fhir 「API 테스터」의 PAT 패널과 같은 규칙.
  * 토큰은 이 탭의 메모리·sessionStorage 에만 머물고 요청 헤더(X-Fhir-Token)로만 나간다.
  */
 export default function PatPanel({
@@ -29,7 +29,7 @@ export default function PatPanel({
     const v = draft.trim();
     if (!v) return;
     onRegister(v);
-    setWarn(looksLikePat(v) ? "" : "형식이 `snuhfhir_<id8>_<secret>` 와 다릅니다 — 그래도 등록했습니다. 조회가 거부되면 값을 확인하세요.");
+    setWarn(looksLikePat(v) ? "" : "형식이 `snuhfhir_<id8>_<secret>` 와 다릅니다 - 그래도 등록했습니다. 조회가 거부되면 값을 확인하세요.");
     setDraft("");
   }
 

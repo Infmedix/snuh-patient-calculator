@@ -2,7 +2,7 @@
 
 - laboratory: `component[].code.coding[0].display` = 검사항목명, `valueQuantity.value` 는 **문자열**.
   component 가 없는 단일 결과는 `code.coding[0].display`(검사분류명) 로는 항목을 알 수 없어 건너뛴다
-  (매뉴얼: 단일 결과는 분류명만 노출) — 단, `valueQuantity` 와 함께 component 가 같이 오면 component 를 쓴다.
+  (매뉴얼: 단일 결과는 분류명만 노출) - 단, `valueQuantity` 와 함께 component 가 같이 오면 component 를 쓴다.
 - clinical: `code.coding[0].display` = 간호항목명, `valueCodeableConcept.coding[0].display` = 간호어휘명,
   `valueCodeableConcept.text` = 기록 내용. 어휘명 → 항목명 순으로 변수를 찾고 값은 text 에서 숫자를 뽑는다.
   "118/72" 형태의 혈압은 SBP·DBP 로 쪼갠다.
@@ -155,7 +155,7 @@ def clinical_candidates(bundles: Iterable[dict], vm: VariableMap) -> list[Candid
         vocab = _display(vcc)
         item = _display(res.get("code"))
         text = vcc.get("text") or ""
-        # 혈압 "118/72" — 어휘명이 수축기/이완기로 갈리지 않은 기록
+        # 혈압 "118/72" - 어휘명이 수축기/이완기로 갈리지 않은 기록
         bp = _BP.search(text)
         label = vocab or item
         if bp and _is_bp_label(label):
@@ -274,7 +274,7 @@ def build_snapshot(
                             source=Source(display=c.display, category=c.category, resource_id=c.resource_id))
         for name, c in latest.items()
     }
-    # MAP 파생 — 기록이 없고 SBP·DBP 가 같은 기록이면 계산해 둔다 (SOFA·APACHE II 용)
+    # MAP 파생 - 기록이 없고 SBP·DBP 가 같은 기록이면 계산해 둔다 (SOFA·APACHE II 용)
     if "map" not in values and "sbp" in values and "dbp" in values:
         s, d = values["sbp"], values["dbp"]
         values["map"] = ObservedValue(variable="map", value=round((s.value + 2 * d.value) / 3, 1), unit="mmHg",

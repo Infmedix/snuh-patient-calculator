@@ -1,7 +1,7 @@
 """스냅샷 → 계산기 입력 자동 채움 + 전체 개요.
 
 우선순위: `derive` 훅 → `variable`(수치) → `flag`(진단). 채운 값마다 출처(`source`)를 붙인다.
-플래그가 None(Condition 조회 실패)이면 채우지 않는다 — 「모른다」를 False 로 바꾸지 않는다.
+플래그가 None(Condition 조회 실패)이면 채우지 않는다 - 「모른다」를 False 로 바꾸지 않는다.
 """
 
 from __future__ import annotations

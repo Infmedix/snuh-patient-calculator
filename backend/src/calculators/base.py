@@ -1,4 +1,4 @@
-"""계산기 공통 타입 — 입력 스펙·결과·검증·레지스트리.
+"""계산기 공통 타입 - 입력 스펙·결과·검증·레지스트리.
 
 프런트 폼은 `CalculatorSpec.inputs` 를 그대로 렌더링하고, 자동 채움(prefill)은
 `InputSpec.variable`(스냅샷 정규 변수) / `InputSpec.flag`(진단 플래그) / `InputSpec.derive`
@@ -26,7 +26,7 @@ class Option:
 
 @dataclass(frozen=True)
 class Derived:
-    """derive 훅의 반환 — 값 + 출처 설명 + (있으면) 기록 시각."""
+    """derive 훅의 반환 - 값 + 출처 설명 + (있으면) 기록 시각."""
 
     value: Any
     source: str
@@ -72,7 +72,7 @@ class InputSpec:
 
 @dataclass(frozen=True)
 class Band:
-    """구간 막대의 한 칸 — `upto` 미만까지 이 구간 (None = 끝까지)."""
+    """구간 막대의 한 칸 - `upto` 미만까지 이 구간 (None = 끝까지)."""
 
     upto: Optional[float]
     label: str
@@ -126,7 +126,7 @@ class Result:
 
 
 class InputError(ValueError):
-    """입력 검증 실패 — 라우터가 400 으로 변환. `missing` 은 비어 있는 필수 키."""
+    """입력 검증 실패 - 라우터가 400 으로 변환. `missing` 은 비어 있는 필수 키."""
 
     def __init__(self, message: str, missing: Optional[list[str]] = None, invalid: Optional[dict] = None):
         super().__init__(message)
@@ -145,7 +145,7 @@ class CalculatorSpec:
     compute: Callable[[dict], Result]
     references: tuple[str, ...] = ()
     scale: Optional[Scale] = None
-    guide: Optional[str] = None          # 카드 상단 한두 문장 — 언제 쓰고 어떻게 읽는지
+    guide: Optional[str] = None          # 카드 상단 한두 문장 - 언제 쓰고 어떻게 읽는지
 
     def input(self, key: str) -> InputSpec:
         for i in self.inputs:

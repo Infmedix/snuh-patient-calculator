@@ -1,4 +1,4 @@
-"""정규 변수 사전 — 원내 항목명(검사항목명·간호어휘명·심전도 구성요소명) → 계산기 변수.
+"""정규 변수 사전 - 원내 항목명(검사항목명·간호어휘명·심전도 구성요소명) → 계산기 변수.
 
 실제 ODS 항목명은 확정되지 않았다 (설계 가정 C). 그래서
   1) 내장 별칭은 영문·한글 관용 표기를 넉넉히 담고,
@@ -8,7 +8,7 @@
   - 항목명을 소문자화하고 괄호·구두점을 공백으로 바꿔 토큰화한다.
   - ASCII 4자 이하 별칭은 **토큰 정확 일치** ("ast" 가 "fasting" 에 걸리지 않게), 그 외는 부분 문자열.
   - `exclude` 토큰이 하나라도 들어 있으면 그 변수에는 매칭하지 않는다 (urine creatinine 등).
-  - 사전 순서대로 첫 매칭 변수를 쓴다 — 더 구체적인 변수를 먼저 둔다.
+  - 사전 순서대로 첫 매칭 변수를 쓴다 - 더 구체적인 변수를 먼저 둔다.
 """
 
 from __future__ import annotations
@@ -169,7 +169,7 @@ def load_variable_map(path: Optional[str]) -> VariableMap:
         logger.info("변수 매핑 덮어쓰기 적용: %s (%d개 변수)", path, len(data))
         return vm
     except Exception:
-        logger.error("변수 매핑 파일을 읽지 못했습니다 (%s) — 내장 별칭만 사용", path, exc_info=True)
+        logger.error("변수 매핑 파일을 읽지 못했습니다 (%s) - 내장 별칭만 사용", path, exc_info=True)
         return _DEFAULT
 
 

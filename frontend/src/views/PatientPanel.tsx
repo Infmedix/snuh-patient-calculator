@@ -3,7 +3,7 @@ import type { Overview } from "../api";
 import { CATEGORY_LABEL, SEX_LABEL, daysAgo, fmtDate, fmtDateTime, fmtNum } from "../format";
 import { Tag, btn, td, th } from "../ui";
 
-/** 좌측 패널 — 환자 요약 · 진단 플래그 · 가져온 값 표 · 경고. */
+/** 좌측 패널 - 환자 요약 · 진단 플래그 · 가져온 값 표 · 경고. */
 export default function PatientPanel({
   overview,
   variables,

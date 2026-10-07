@@ -1,8 +1,8 @@
-"""Child-Pugh — 간경변 중증도.
+"""Child-Pugh - 간경변 중증도.
 
-빌리루빈 <2 / 2–3 / >3 mg/dL → 1/2/3, 알부민 >3.5 / 2.8–3.5 / <2.8 g/dL → 1/2/3,
-INR <1.7 / 1.7–2.3 / >2.3 → 1/2/3, 복수 없음/경도(이뇨제 조절)/중등도 이상 → 1/2/3,
-뇌병증 없음/1–2등급/3–4등급 → 1/2/3.  Class A 5–6, B 7–9, C 10–15.  Pugh RNH et al. Br J Surg 1973;60:646-9.
+빌리루빈 <2 / 2-3 / >3 mg/dL → 1/2/3, 알부민 >3.5 / 2.8-3.5 / <2.8 g/dL → 1/2/3,
+INR <1.7 / 1.7-2.3 / >2.3 → 1/2/3, 복수 없음/경도(이뇨제 조절)/중등도 이상 → 1/2/3,
+뇌병증 없음/1-2등급/3-4등급 → 1/2/3.  Class A 5-6, B 7-9, C 10-15.  Pugh RNH et al. Br J Surg 1973;60:646-9.
 """
 
 from __future__ import annotations
@@ -11,7 +11,7 @@ from src.calculators.base import Band, CalculatorSpec, Detail, InputSpec, Option
 
 
 def _pts(value, cuts, ascending=True):
-    """cuts = (lo, hi): ascending → <lo 1, lo–hi 2, >hi 3; descending(알부민) → >hi 1, lo–hi 2, <lo 3."""
+    """cuts = (lo, hi): ascending → <lo 1, lo-hi 2, >hi 3; descending(알부민) → >hi 1, lo-hi 2, <lo 3."""
     lo, hi = cuts
     if ascending:
         return 1 if value < lo else (2 if value <= hi else 3)
@@ -20,7 +20,7 @@ def _pts(value, cuts, ascending=True):
 
 SELECT_PTS = {"none": 1, "mild": 2, "moderate_severe": 3, "grade_1_2": 2, "grade_3_4": 3}
 ASCITES_LABEL = {"none": "없음", "mild": "경도 (이뇨제로 조절)", "moderate_severe": "중등도 이상 (난치성)"}
-ENCEPH_LABEL = {"none": "없음", "grade_1_2": "1–2등급", "grade_3_4": "3–4등급"}
+ENCEPH_LABEL = {"none": "없음", "grade_1_2": "1-2등급", "grade_3_4": "3-4등급"}
 
 
 def compute(i: dict) -> Result:
@@ -31,11 +31,11 @@ def compute(i: dict) -> Result:
     enc = SELECT_PTS[i["encephalopathy"]]
     score = b + a + n + asc + enc
     if score <= 6:
-        label, sev, surv = "Class A — 잘 보존된 간기능", "ok", "1년 생존 ~100%, 2년 ~85%"
+        label, sev, surv = "Class A - 잘 보존된 간기능", "ok", "1년 생존 ~100%, 2년 ~85%"
     elif score <= 9:
-        label, sev, surv = "Class B — 유의한 기능 저하", "warn", "1년 생존 ~80%, 2년 ~60%"
+        label, sev, surv = "Class B - 유의한 기능 저하", "warn", "1년 생존 ~80%, 2년 ~60%"
     else:
-        label, sev, surv = "Class C — 비대상성 간경변", "danger", "1년 생존 ~45%, 2년 ~35%"
+        label, sev, surv = "Class C - 비대상성 간경변", "danger", "1년 생존 ~45%, 2년 ~35%"
     return Result(
         value=score, unit="점", label=label, severity=sev,
         details=[

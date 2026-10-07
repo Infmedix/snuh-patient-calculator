@@ -1,4 +1,4 @@
-"""SNUH 환자 정보 기반 수치 계산기 — FastAPI 진입점."""
+"""SNUH 환자 정보 기반 수치 계산기 - FastAPI 진입점."""
 
 from __future__ import annotations
 
@@ -24,7 +24,7 @@ root.handlers.clear()
 _h = logging.StreamHandler(sys.stdout)
 _h.setFormatter(logging.Formatter("%(asctime)s %(levelname)s:%(message)s", datefmt="%m/%d/%Y %I:%M:%S %p"))
 root.addHandler(_h)
-# access log 는 환자번호(경로)를 stdout 에 찍는다 — 끈다 (snuh-fhir 와 같은 원칙).
+# access log 는 환자번호(경로)를 stdout 에 찍는다 - 끈다 (snuh-fhir 와 같은 원칙).
 logging.getLogger("uvicorn.access").disabled = True
 
 
@@ -34,9 +34,9 @@ async def lifespan(app: FastAPI):
         logging.error("[Lifespan] APP_FHIR_MODE=%r 는 알 수 없는 값입니다 (%s)", settings.FHIR_MODE, "/".join(settings.FHIR_MODES))
         raise RuntimeError("invalid APP_FHIR_MODE")
     if settings.FHIR_MODE == "http" and not settings.FHIR_TOKEN:
-        logging.warning("[Lifespan] APP_FHIR_TOKEN 미설정 — 서비스 계정 PAT 가 없어 사용자가 화면에서 PAT 를 등록해야 FHIR 조회가 됩니다")
+        logging.warning("[Lifespan] APP_FHIR_TOKEN 미설정 - 서비스 계정 PAT 가 없어 사용자가 화면에서 PAT 를 등록해야 FHIR 조회가 됩니다")
     elif settings.FHIR_MODE == "http":
-        logging.info("[Lifespan] 서비스 계정 PAT 설정됨 (APP_FHIR_TOKEN) — 요청의 X-Fhir-Token 이 있으면 그쪽이 우선")
+        logging.info("[Lifespan] 서비스 계정 PAT 설정됨 (APP_FHIR_TOKEN) - 요청의 X-Fhir-Token 이 있으면 그쪽이 우선")
     if settings._DOTENV_LOADED:
         logging.info("[Lifespan] .env 적용: %s", ", ".join(settings._DOTENV_LOADED))
     logging.info("[Lifespan] FHIR source: %s", dependencies.describe_source())

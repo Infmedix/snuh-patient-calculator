@@ -1,4 +1,4 @@
-/** 표시용 포맷 도우미 — 순수 함수. */
+/** 표시용 포맷 도우미 - 순수 함수. */
 
 export function fmtNum(v: number | null | undefined, digits = 1): string {
   if (v === null || v === undefined || !Number.isFinite(v)) return "-";
@@ -21,7 +21,7 @@ export function fmtDate(iso: string | null | undefined): string {
   return s === "-" ? s : s.slice(0, 10);
 }
 
-/** 기록 시각이 `now` 기준 며칠 전인지 — "오늘" · "3일 전" · "2개월 전". */
+/** 기록 시각이 `now` 기준 며칠 전인지 - "오늘" · "3일 전" · "2개월 전". */
 export function daysAgo(iso: string | null | undefined, now: Date = new Date()): string {
   if (!iso) return "";
   const d = new Date(iso);

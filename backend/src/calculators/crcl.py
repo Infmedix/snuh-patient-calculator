@@ -1,4 +1,4 @@
-"""CrCl — Cockcroft-Gault 크레아티닌 청소율.
+"""CrCl - Cockcroft-Gault 크레아티닌 청소율.
 
 CrCl = (140 − 나이) × 체중 / (72 × Scr) × 0.85 [여성]   (Nephron 1976;16:31-41)
 체중 기준: 실제체중 / 이상체중(Devine: 남 50 + 0.9·(cm−152.4), 여 45.5 + 0.9·(cm−152.4)) /
@@ -42,7 +42,7 @@ def compute(i: dict) -> Result:
     elif crcl >= 60:
         label, sev = "경도 감소", "ok"
     elif crcl >= 30:
-        label, sev = "중등도 감소 — 신기능 용량 조절 확인", "warn"
+        label, sev = "중등도 감소 - 신기능 용량 조절 확인", "warn"
     elif crcl >= 15:
         label, sev = "중증 감소", "danger"
     else:
@@ -51,13 +51,13 @@ def compute(i: dict) -> Result:
     if basis == "actual" and i.get("height_cm") is not None:
         ibw = ideal_body_weight(i["height_cm"], i["sex"])
         if ibw > 0 and actual > ibw * 1.3:
-            notes.append("실제체중이 이상체중의 130% 를 넘습니다 — 보정체중 기준도 확인하세요.")
+            notes.append("실제체중이 이상체중의 130% 를 넘습니다 - 보정체중 기준도 확인하세요.")
     return Result(value=round(crcl, 1), unit="mL/min", label=label, severity=sev, details=details, notes=notes)
 
 
 SPEC = register(CalculatorSpec(
     id="crcl", name="CrCl (Cockcroft-Gault)", group="신체·신장",
-    description="크레아티닌 청소율 추정 — 약물 용량 조절 판단",
+    description="크레아티닌 청소율 추정 - 약물 용량 조절 판단",
     inputs=(
         age_input(),
         sex_input(),

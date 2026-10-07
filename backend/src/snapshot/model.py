@@ -1,7 +1,7 @@
-"""환자 스냅샷 — FHIR 번들에서 뽑아낸 「변수별 가장 최근 값」과 진단 플래그.
+"""환자 스냅샷 - FHIR 번들에서 뽑아낸 「변수별 가장 최근 값」과 진단 플래그.
 
 계산기 prefill 과 API 응답이 같은 모델을 쓴다. 값마다 출처(항목명·리소스 id·카테고리)와
-기록 시각을 보존한다 — 화면은 이걸로 「FHIR · 10-01 · Creatinine」 태그를 그린다.
+기록 시각을 보존한다 - 화면은 이걸로 「FHIR · 10-01 · Creatinine」 태그를 그린다.
 """
 
 from __future__ import annotations
@@ -73,7 +73,7 @@ class Snapshot(BaseModel):
         return v.value if v else None
 
     def flag(self, name: str) -> Optional[bool]:
-        """진단 플래그. Condition 을 못 가져왔으면 None (모른다) — False 와 구분한다."""
+        """진단 플래그. Condition 을 못 가져왔으면 None (모른다) - False 와 구분한다."""
         if not self.conditions_available:
             return None
         f = self.flags.get(name)

@@ -1,4 +1,4 @@
-"""snuh-fhir 클라이언트 — HTTP(운영) 와 mock(fixture) 두 구현, 같은 인터페이스.
+"""snuh-fhir 클라이언트 - HTTP(운영) 와 mock(fixture) 두 구현, 같은 인터페이스.
 
 규칙 (snuh-fhir Common_API.md):
 - 모든 FHIR 호출에 `Authorization: Bearer <PAT>`. 401 → 토큰 문제, 403 → 접근 권한(사람 단위) 문제, 503 → 일시 장애.
@@ -84,7 +84,7 @@ def _detail(res: httpx.Response, path: str) -> str:
     if s == 401:
         return "FHIR 토큰이 없거나 거부되었습니다 (APP_FHIR_TOKEN 또는 X-Fhir-Token 확인)" + (f": {msg}" if msg else "")
     if s == 403:
-        return "FHIR 접근 권한이 없습니다 — 토큰 소유자에게 FHIR 접근 허용이 부여되어야 합니다" + (f": {msg}" if msg else "")
+        return "FHIR 접근 권한이 없습니다 - 토큰 소유자에게 FHIR 접근 허용이 부여되어야 합니다" + (f": {msg}" if msg else "")
     if s == 404:
         return msg or f"FHIR 리소스를 찾을 수 없습니다 ({path})"
     if s == 503:
@@ -204,7 +204,7 @@ async def search_all(client: FhirClient, path: str, params: dict, page_size: int
         if n < page_size:
             return bundles
         offset += page_size
-    logger.warning("[fhir] %s 페이지 상한(%d) 도달 — 더 오래된 기록은 보지 않았습니다", path, max_pages)
+    logger.warning("[fhir] %s 페이지 상한(%d) 도달 - 더 오래된 기록은 보지 않았습니다", path, max_pages)
     return bundles
 
 
@@ -249,7 +249,7 @@ async def fetch_patient_data(client: FhirClient, pid: str, now: datetime) -> Raw
         if isinstance(r, BaseException):
             msg = r.detail if isinstance(r, FhirError) else r.__class__.__name__
             logger.warning("[fhir] %s 조회 실패: %s", key, msg)
-            data.warnings.append(f"{labels[key]} 조회 실패 — {msg}")
+            data.warnings.append(f"{labels[key]} 조회 실패 - {msg}")
             if key != "conditions":
                 setattr(data, key, [])
             continue

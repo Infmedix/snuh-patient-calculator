@@ -21,7 +21,7 @@ def load_dotenv(path: Optional[Path] = None) -> list[str]:
     """저장소 루트(또는 backend/)의 `.env` 를 읽어 **아직 없는** 환경변수만 채운다.
 
     docker compose 는 env_file 로 넣어 주지만 로컬 `uv run uvicorn` 은 아무것도 읽지 않아
-    APP_FHIR_MODE=mock 을 빠뜨리면 snuh-fhir(localhost:8000) 접속 실패로 502 가 난다 — 그 함정 제거.
+    APP_FHIR_MODE=mock 을 빠뜨리면 snuh-fhir(localhost:8000) 접속 실패로 502 가 난다 - 그 함정 제거.
     셸에서 직접 지정한 값이 항상 우선한다. 형식: `KEY=value`, `#` 주석, 따옴표 허용. 외부 의존성 없음.
     """
     candidates = [path] if path else [_REPO_DIR / ".env", _BACKEND_DIR / ".env"]
@@ -92,12 +92,12 @@ def _float_env(name: str, default: float, minimum: float = 0.0) -> float:
 # http = snuh-fhir 호출 (운영). mock = backend/fixtures 의 번들 (개발·시연·테스트).
 FHIR_MODES = ("http", "mock")
 FHIR_MODE = (_env("APP_FHIR_MODE") or "http").lower()
-# snuh-fhir 기본 URL — gateway 경유는 https://<host>/apps/runtime/fhir, 클러스터 내부는 http://snuh-fhir:8000
+# snuh-fhir 기본 URL - gateway 경유는 https://<host>/apps/runtime/fhir, 클러스터 내부는 http://snuh-fhir:8000
 FHIR_BASE_URL = (_env("APP_FHIR_BASE_URL") or "http://localhost:8000").rstrip("/")
 # 서비스 계정 PAT. 요청의 X-Fhir-Token 헤더가 있으면 그쪽이 우선. 값은 어디에도 로그하지 않는다.
 FHIR_TOKEN = _env("APP_FHIR_TOKEN")
 FHIR_TIMEOUT_SECONDS = _float_env("APP_FHIR_TIMEOUT_SECONDS", 30.0, minimum=1.0)
-# mock 모드 fixture 디렉터리 — `patients/{환자번호}.json` (Bundle type=collection)
+# mock 모드 fixture 디렉터리 - `patients/{환자번호}.json` (Bundle type=collection)
 FIXTURES_DIR = _env("APP_FIXTURES_DIR") or str(_BACKEND_DIR / "fixtures")
 
 # ===== 조회 범위 =====
@@ -105,14 +105,14 @@ FIXTURES_DIR = _env("APP_FIXTURES_DIR") or str(_BACKEND_DIR / "fixtures")
 LAB_LOOKBACK_DAYS = _int_env("APP_LAB_LOOKBACK_DAYS", 180)
 VITAL_LOOKBACK_DAYS = _int_env("APP_VITAL_LOOKBACK_DAYS", 30)
 ECG_LOOKBACK_DAYS = _int_env("APP_ECG_LOOKBACK_DAYS", 365)
-# 체중 이력(NRS-2002 체중감소율)용 — 활력징후 기간과 별개로 더 길게 본다.
+# 체중 이력(NRS-2002 체중감소율)용 - 활력징후 기간과 별개로 더 길게 본다.
 WEIGHT_HISTORY_DAYS = _int_env("APP_WEIGHT_HISTORY_DAYS", 100)
 # 심전도 exam 검색의 code(처방명 LIKE) 값
 ECG_ORDER_NAME = _env("APP_ECG_ORDER_NAME") or "심전도"
-# 페이지 크기(snuh-fhir 상한 1000)와 리소스별 최대 페이지 수 — 환자 1명 조회의 비용 상한
+# 페이지 크기(snuh-fhir 상한 1000)와 리소스별 최대 페이지 수 - 환자 1명 조회의 비용 상한
 PAGE_SIZE = min(_int_env("APP_PAGE_SIZE", 1000), 1000)
 MAX_PAGES = _int_env("APP_MAX_PAGES", 3)
-# 자동 채움값이 이보다 오래되면 화면에 「오래됨」 태그 (계산은 그대로 — 판단은 사용자)
+# 자동 채움값이 이보다 오래되면 화면에 「오래됨」 태그 (계산은 그대로 - 판단은 사용자)
 STALE_AFTER_DAYS = _int_env("APP_STALE_AFTER_DAYS", 7)
 
 # 항목명 → 정규 변수 별칭 덮어쓰기 (YAML). 미설정 = 내장 별칭만.
@@ -120,7 +120,7 @@ VARIABLE_MAP_PATH = _env("APP_VARIABLE_MAP_PATH")
 
 # ===== 배포 =====
 # 외부 공개 경로 prefix (예: /apps/runtime/calculator). 미설정 = prefix 없음.
-# snuhai 앱 스토어(snuhai-paas)는 컨테이너에 BASE_URL=/apps/runtime/{slug} 를 주입한다 — APP_PATH_PREFIX 가 없으면 그 값을 쓴다.
+# snuhai 앱 스토어(snuhai-paas)는 컨테이너에 BASE_URL=/apps/runtime/{slug} 를 주입한다 - APP_PATH_PREFIX 가 없으면 그 값을 쓴다.
 PATH_PREFIX = _env("APP_PATH_PREFIX") or _env("BASE_URL") or ""
 # 빌드된 프런트(dist) 경로. 없으면 /ui 만 404, 부팅 정상.
 UI_DIST_DIR = _env("APP_UI_DIST_DIR") or str(_BACKEND_DIR.parent / "frontend" / "dist")

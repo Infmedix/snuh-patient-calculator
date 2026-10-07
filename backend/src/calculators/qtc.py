@@ -1,7 +1,7 @@
-"""QTc — 심박수 보정 QT 간격.
+"""QTc - 심박수 보정 QT 간격.
 
 RR(초) = 60 / HR.  Bazett QT/√RR · Fridericia QT/∛RR · Framingham QT + 154(1−RR) · Hodges QT + 1.75(HR−60).
-대표값은 Fridericia (빈맥·서맥에서 Bazett 의 과대/과소 보정이 덜함 — AHA/ACC/HRS 2009 권고 중 하나).
+대표값은 Fridericia (빈맥·서맥에서 Bazett 의 과대/과소 보정이 덜함 - AHA/ACC/HRS 2009 권고 중 하나).
 연장 기준: 남 >450 ms, 여 >460 ms; ≥500 ms 는 TdP 위험 증가. Rautaharju PM et al. Circulation 2009;119:e241-50.
 """
 
@@ -26,7 +26,7 @@ def compute(i: dict) -> Result:
     qtc = f["fridericia"]
     limit = 460 if i["sex"] == "F" else 450
     if qtc >= 500:
-        label, sev = "QTc ≥500 ms — 심각한 연장 (TdP 위험)", "danger"
+        label, sev = "QTc ≥500 ms - 심각한 연장 (TdP 위험)", "danger"
     elif qtc > limit:
         label, sev = f"QTc 연장 (>{limit} ms)", "warn"
     elif qtc < 340:
@@ -44,7 +44,7 @@ def compute(i: dict) -> Result:
     if i.get("reported_qtc_ms") is not None:
         details.append(Detail("기기 보고 QTc", f"{i['reported_qtc_ms']:g} ms"))
         if abs(i["reported_qtc_ms"] - f["bazett"]) > 20 and abs(i["reported_qtc_ms"] - qtc) > 20:
-            notes.append("기기 보고 QTc 와 계산값 차이가 20 ms 를 넘습니다 — 입력 QT/HR 이 같은 기록인지 확인하세요.")
+            notes.append("기기 보고 QTc 와 계산값 차이가 20 ms 를 넘습니다 - 입력 QT/HR 이 같은 기록인지 확인하세요.")
     return Result(value=round(qtc), unit="ms", label=label, severity=sev, details=details, notes=notes,
                   extra={k: round(v, 1) for k, v in f.items()})
 

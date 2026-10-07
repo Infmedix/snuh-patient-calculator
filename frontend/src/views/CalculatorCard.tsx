@@ -23,7 +23,7 @@ const RESULT_BG: Record<Result["severity"], string> = {
 };
 
 /**
- * 계산기 카드 — 위에서 아래로 「결과 → 입력 → 참고」. 입력이 바뀌면 300ms 뒤 서버에 재계산을 요청한다.
+ * 계산기 카드 - 위에서 아래로 「결과 → 입력 → 참고」. 입력이 바뀌면 300ms 뒤 서버에 재계산을 요청한다.
  * 환자가 바뀌면 부모가 key 를 바꿔 다시 마운트한다 (폼을 prefill 로 재생성).
  */
 export default function CalculatorCard({
@@ -35,9 +35,9 @@ export default function CalculatorCard({
   spec: CalculatorSpec;
   overview: CalculatorOverview | undefined;
   flagLabels?: Record<string, string>;
-  /** 현재 결과(사용자 수정 반영)를 부모에 보고 — 요약 표·탭 배지용 */
+  /** 현재 결과(사용자 수정 반영)를 부모에 보고 - 요약 표·탭 배지용 */
   onResult?: (id: string, result: Result | null, missing: string[]) => void;
-  /** 요약 표에서 이 카드로 이동할 때마다 증가 — 입력 영역을 연다 */
+  /** 요약 표에서 이 카드로 이동할 때마다 증가 - 입력 영역을 연다 */
   focusSeq?: number;
 }) {
   const [form, setForm] = useState<FormState>(() => initialForm(spec, overview?.prefill));
@@ -247,7 +247,7 @@ function labelOf(spec: CalculatorSpec, key: string): string {
   return spec.inputs.find((i) => i.key === key)?.label ?? key;
 }
 
-/** 출처 한 줄 — 「검사 · Creatinine 1.8 mg/dL · 2026-10-05 08:30 (2일 전)」 */
+/** 출처 한 줄 - 「검사 · Creatinine 1.8 mg/dL · 2026-10-05 08:30 (2일 전)」 */
 function sourceLine(spec: InputSpec, st: FieldState): { text: string; stale: boolean } {
   const src = st.source;
   if (src) {
@@ -256,9 +256,9 @@ function sourceLine(spec: InputSpec, st: FieldState): { text: string; stale: boo
     return { text: `${cat} · ${src.text}${when}`, stale: src.stale };
   }
   if (st.origin === "manual") return { text: "직접 입력한 값", stale: false };
-  if (st.origin === "default") return { text: spec.help ? `기본값 · ${spec.help}` : "기본값 — 해당하면 바꿔 주세요", stale: false };
+  if (st.origin === "default") return { text: spec.help ? `기본값 · ${spec.help}` : "기본값 - 해당하면 바꿔 주세요", stale: false };
   if (spec.help) return { text: spec.help, stale: false };
-  return { text: spec.required ? "기록에서 찾지 못했습니다 — 직접 입력해 주세요" : "선택 입력", stale: false };
+  return { text: spec.required ? "기록에서 찾지 못했습니다 - 직접 입력해 주세요" : "선택 입력", stale: false };
 }
 
 function Field({

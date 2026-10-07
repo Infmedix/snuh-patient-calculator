@@ -1,9 +1,9 @@
-"""HAS-BLED — 항응고 치료 중 주요 출혈 위험.
+"""HAS-BLED - 항응고 치료 중 주요 출혈 위험.
 
 H 조절되지 않는 고혈압(SBP >160) 1 / A 신장이상(투석·이식·Cr >2.26 mg/dL) 1 + 간이상(간경변 또는
 빌리루빈 >2×ULN 과 AST/ALT/ALP >3×ULN) 1 / S 뇌졸중 병력 1 / B 출혈 병력·소인 1 / L 불안정 INR 1 /
 E 65세 초과 1 / D 항혈소판·NSAID 1 + 음주 1.  Pisters R et al. Chest 2010;138:1093-100.
-≥3 고위험 — 항응고를 피하라는 뜻이 아니라 교정 가능한 인자를 다루고 더 자주 추적하라는 뜻.
+≥3 고위험 - 항응고를 피하라는 뜻이 아니라 교정 가능한 인자를 다루고 더 자주 추적하라는 뜻.
 """
 
 from __future__ import annotations
@@ -89,7 +89,7 @@ def compute(i: dict) -> Result:
     details = [Detail(label, "예" if i[k] else "아니오", 1 if i[k] else 0) for k, label in ITEMS]
     score = sum(1 for k, _ in ITEMS if i[k])
     if score >= 3:
-        label, sev = "고위험 — 교정 가능한 출혈 인자 관리·잦은 추적", "danger"
+        label, sev = "고위험 - 교정 가능한 출혈 인자 관리·잦은 추적", "danger"
     elif score == 2:
         label, sev = "중간 위험", "warn"
     else:

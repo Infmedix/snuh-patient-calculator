@@ -18,7 +18,7 @@ import PatPanel from "./views/PatPanel";
 import PatientPanel from "./views/PatientPanel";
 import SummaryTable, { type LiveResult } from "./views/SummaryTable";
 
-/** 그룹 표시 순서 — 백엔드 레지스트리 순서와 같다. 서버가 새 그룹을 보내면 뒤에 붙는다. */
+/** 그룹 표시 순서 - 백엔드 레지스트리 순서와 같다. 서버가 새 그룹을 보내면 뒤에 붙는다. */
 const GROUP_ORDER = ["신체·신장", "심혈관", "간", "중증도", "영양"];
 const SUMMARY_TAB = "요약";
 
@@ -33,12 +33,12 @@ export default function App() {
   const [overview, setOverview] = useState<Overview | null>(null);
   const [loading, setLoading] = useState(false);
   const [loadErr, setLoadErr] = useState("");
-  // 카드 초기화 키 — 새 환자를 불러오면 카드 폼을 prefill 로 다시 만든다
+  // 카드 초기화 키 - 새 환자를 불러오면 카드 폼을 prefill 로 다시 만든다
   const [epoch, setEpoch] = useState(0);
   const [tab, setTab] = useState<string>(SUMMARY_TAB);
-  // 카드가 보고하는 현재 결과 (사용자 수정 반영) — 요약 표·탭 배지가 쓴다
+  // 카드가 보고하는 현재 결과 (사용자 수정 반영) - 요약 표·탭 배지가 쓴다
   const [live, setLive] = useState<Record<string, LiveResult>>({});
-  // 요약 표 → 카드 이동 요청 (카드 id 별 증가 카운터 — 같은 카드를 다시 눌러도 열리게)
+  // 요약 표 → 카드 이동 요청 (카드 id 별 증가 카운터 - 같은 카드를 다시 눌러도 열리게)
   const [focus, setFocus] = useState<Record<string, number>>({});
   const inputRef = useRef<HTMLInputElement>(null);
   // PAT (B 방식: 사용자 본인 토큰). mock 모드에서는 필요 없다.
@@ -94,7 +94,7 @@ export default function App() {
     }
   }, []);
 
-  // `#/p/{환자번호}` 딥링크 — 새로고침·공유 시 같은 환자를 다시 불러온다
+  // `#/p/{환자번호}` 딥링크 - 새로고침·공유 시 같은 환자를 다시 불러온다
   useEffect(() => {
     const m = /^#\/p\/(.+)$/.exec(window.location.hash);
     if (m) {
@@ -158,7 +158,7 @@ export default function App() {
       .filter((g) => g.items.length);
   }, [specs]);
 
-  /** 그룹별 계산 완료 수 — 탭 배지 */
+  /** 그룹별 계산 완료 수 - 탭 배지 */
   const groupDone = useMemo(() => {
     const m: Record<string, { done: number; total: number }> = {};
     for (const g of groups) {
@@ -168,7 +168,7 @@ export default function App() {
   }, [groups, live]);
 
   useEffect(() => {
-    document.title = overview ? `${overview.snapshot.patient.id} — 환자 계산기` : "환자 계산기 — SNUH";
+    document.title = overview ? `${overview.snapshot.patient.id} - 환자 계산기` : "환자 계산기 - SNUH";
   }, [overview]);
 
   function jumpTo(calcId: string) {
@@ -231,7 +231,7 @@ export default function App() {
               </Tag>
             )}
             {fhirMode === "mock" && (
-              <Tag tone="amber" title="APP_FHIR_MODE=mock — fixture 데이터">
+              <Tag tone="amber" title="APP_FHIR_MODE=mock - fixture 데이터">
                 mock 데이터
               </Tag>
             )}
@@ -248,7 +248,7 @@ export default function App() {
         )}
         {specsErr && (
           <div className="mb-4">
-            <ErrorBox message={`계산기 목록을 불러올 수 없습니다 — ${specsErr}`} />
+            <ErrorBox message={`계산기 목록을 불러올 수 없습니다 - ${specsErr}`} />
             <button type="button" className={`${btn.ghost} mt-1`} onClick={loadSpecs}>
               다시 시도
             </button>

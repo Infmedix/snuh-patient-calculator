@@ -34,7 +34,7 @@ def derive_map(s: Snapshot) -> Optional[Derived]:
 
 
 def derive_ecg_or_vital_hr(s: Snapshot) -> Optional[Derived]:
-    """QTc 용 심박수 — 심전도 기록 심박수 우선, 없으면 활력징후 HR."""
+    """QTc 용 심박수 - 심전도 기록 심박수 우선, 없으면 활력징후 HR."""
     for var in ("ecg_hr", "hr"):
         v = s.value(var)
         if v:

@@ -1,4 +1,4 @@
-"""요청 단위 의존성 — FHIR 클라이언트 선택 (mode·토큰)."""
+"""요청 단위 의존성 - FHIR 클라이언트 선택 (mode·토큰)."""
 
 from __future__ import annotations
 

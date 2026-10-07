@@ -1,6 +1,6 @@
-"""BMI — 체질량지수. 분류는 대한비만학회 비만 진료지침 2022 (아시아·태평양 기준).
+"""BMI - 체질량지수. 분류는 대한비만학회 비만 진료지침 2022 (아시아·태평양 기준).
 
-저체중 <18.5 / 정상 18.5–22.9 / 비만전단계(과체중) 23–24.9 / 1단계 비만 25–29.9 / 2단계 30–34.9 / 3단계 ≥35.
+저체중 <18.5 / 정상 18.5-22.9 / 비만전단계(과체중) 23-24.9 / 1단계 비만 25-29.9 / 2단계 30-34.9 / 3단계 ≥35.
 """
 
 from __future__ import annotations
@@ -32,7 +32,7 @@ def compute(i: dict) -> Result:
 
 SPEC = register(CalculatorSpec(
     id="bmi", name="BMI", group="신체·신장",
-    description="체질량지수 — 비만/체중 상태 평가",
+    description="체질량지수 - 비만/체중 상태 평가",
     inputs=(
         InputSpec("weight_kg", "체중", "number", unit="kg", minimum=1, maximum=500, variable="weight_kg"),
         InputSpec("height_cm", "신장", "number", unit="cm", minimum=30, maximum=300, variable="height_cm"),

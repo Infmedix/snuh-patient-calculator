@@ -1,10 +1,10 @@
-"""APACHE II — 중환자 중증도 (Knaus WA et al. Crit Care Med 1985;13:818-29).
+"""APACHE II - 중환자 중증도 (Knaus WA et al. Crit Care Med 1985;13:818-29).
 
-APS 12항목(입실 후 24시간 최악값) + 나이 점수 + 만성 건강 점수. 0–71.
-산소화: FiO₂ ≥0.5 → A-aDO₂ = FiO₂·713 − PaCO₂/0.8 − PaO₂ (≥500 4 · 350–499 3 · 200–349 2 · <200 0),
-        FiO₂ <0.5 → PaO₂ (>70 0 · 61–70 1 · 55–60 3 · <55 4).
+APS 12항목(입실 후 24시간 최악값) + 나이 점수 + 만성 건강 점수. 0-71.
+산소화: FiO₂ ≥0.5 → A-aDO₂ = FiO₂·713 − PaCO₂/0.8 − PaO₂ (≥500 4 · 350-499 3 · 200-349 2 · <200 0),
+        FiO₂ <0.5 → PaO₂ (>70 0 · 61-70 1 · 55-60 3 · <55 4).
 산염기: 동맥혈 pH 우선, ABG 없으면 HCO₃⁻. 크레아티닌: 급성 신부전이면 점수 2배. GCS: 15 − GCS.
-나이: ≤44 0 · 45–54 2 · 55–64 3 · 65–74 5 · ≥75 6.
+나이: ≤44 0 · 45-54 2 · 55-64 3 · 65-74 5 · ≥75 6.
 만성 건강(중증 장기부전·면역저하 병력): 비수술/응급수술 5 · 선택수술 2.
 """
 
@@ -118,7 +118,7 @@ SPEC = register(CalculatorSpec(
                   help="기록이 없으면 (SBP + 2·DBP)/3 로 채움"),
         InputSpec("hr", "심박수", "number", unit="/분", minimum=0, maximum=300, variable="hr"),
         InputSpec("rr", "호흡수", "number", unit="/분", minimum=0, maximum=100, variable="rr"),
-        InputSpec("fio2", "FiO₂", "number", unit="분율(0.21–1.0)", minimum=0.21, maximum=100, variable="fio2",
+        InputSpec("fio2", "FiO₂", "number", unit="분율(0.21-1.0)", minimum=0.21, maximum=100, variable="fio2",
                   help="퍼센트로 입력해도 됩니다"),
         InputSpec("pao2", "PaO₂", "number", unit="mmHg", minimum=10, maximum=700, variable="pao2"),
         InputSpec("paco2", "PaCO₂", "number", unit="mmHg", minimum=5, maximum=200, required=False, variable="paco2",

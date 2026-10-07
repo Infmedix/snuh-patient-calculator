@@ -1,7 +1,7 @@
 """프런트(빌드된 dist)를 `/ui` 로 서빙 + `/` → `./ui/` 307 (snuh-fhir `src/ui.py` 이식).
 
 - 프런트는 `vite base:"./"` + 상대 경로 API(`../api/...`) 라 prefix 를 모른 채 동작한다.
-- `/` 의 Location 은 **상대** `./ui/` — strip 하는 gateway 뒤에서도 prefix 가 유지된다.
+- `/` 의 Location 은 **상대** `./ui/` - strip 하는 gateway 뒤에서도 prefix 가 유지된다.
 - dist 가 없으면 부팅이 죽지 않고 `/ui` 만 404 (백엔드 단독 배포·테스트 보호).
 """
 
@@ -37,4 +37,4 @@ def install_ui(app: FastAPI, dist_dir: Optional[str] = None) -> bool:
 def describe() -> str:
     if _state["dist"]:
         return f"mounted ({UI_MOUNT_PATH} ← {_state['dist']})"
-    return f"not mounted (dist 없음: {settings.UI_DIST_DIR} — {UI_MOUNT_PATH} 는 404)"
+    return f"not mounted (dist 없음: {settings.UI_DIST_DIR} - {UI_MOUNT_PATH} 는 404)"

@@ -19,7 +19,7 @@ logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/api", tags=["Patients"])
 
 
-# PAT 문제는 424(Failed Dependency) + code 로 돌려준다 — 401/403 을 그대로 내면 상위 gateway 가 계산기
+# PAT 문제는 424(Failed Dependency) + code 로 돌려준다 - 401/403 을 그대로 내면 상위 gateway 가 계산기
 # 자체의 로그인 문제로 오해해 가로챌 수 있고, 프런트는 code 로 「토큰 재등록」과 「접근 허용 요청」을 구분해 안내한다.
 PAT_MISSING = {"code": "pat_missing",
                "message": "FHIR 조회 토큰이 없습니다. 서버 설정(APP_FHIR_TOKEN)에 서비스 계정 PAT 를 넣거나, 화면에서 본인 PAT 를 등록하세요."}
