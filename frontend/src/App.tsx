@@ -32,6 +32,8 @@ export default function App() {
   const [tab, setTab] = useState<string>(SUMMARY_TAB);
   // 카드가 보고하는 현재 결과 (사용자 수정 반영) — 요약 표·탭 배지가 쓴다
   const [live, setLive] = useState<Record<string, LiveResult>>({});
+  // 요약 표 → 카드 이동 요청 (카드 id 별 증가 카운터 — 같은 카드를 다시 눌러도 열리게)
+  const [focus, setFocus] = useState<Record<string, number>>({});
   const inputRef = useRef<HTMLInputElement>(null);
 
   const loadSpecs = useCallback(() => {
@@ -54,6 +56,7 @@ export default function App() {
       const ov = await fetchOverview(id);
       setOverview(ov);
       setLive({});
+      setFocus({});
       setEpoch((n) => n + 1);
       setTab(SUMMARY_TAB);
       window.location.hash = `#/p/${encodeURIComponent(id)}`;
@@ -128,6 +131,7 @@ export default function App() {
     const spec = specs?.items.find((s) => s.id === calcId);
     if (!spec) return;
     setTab(spec.group);
+    setFocus((f) => ({ ...f, [calcId]: (f[calcId] ?? 0) + 1 }));
     // 탭이 그려진 뒤 카드로 스크롤
     window.setTimeout(() => document.getElementById(`calc-${calcId}`)?.scrollIntoView({ behavior: "smooth", block: "start" }), 50);
   }
@@ -230,6 +234,7 @@ export default function App() {
                           overview={byId.get(spec.id)}
                           flagLabels={overview?.flag_labels ?? specs.flags}
                           onResult={onResult}
+                          focusSeq={focus[spec.id] ?? 0}
                         />
                       ))}
                     </div>

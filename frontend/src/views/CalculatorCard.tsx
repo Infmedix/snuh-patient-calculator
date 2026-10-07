@@ -30,19 +30,23 @@ export default function CalculatorCard({
   spec,
   overview,
   onResult,
+  focusSeq,
 }: {
   spec: CalculatorSpec;
   overview: CalculatorOverview | undefined;
   flagLabels?: Record<string, string>;
   /** 현재 결과(사용자 수정 반영)를 부모에 보고 — 요약 표·탭 배지용 */
   onResult?: (id: string, result: Result | null, missing: string[]) => void;
+  /** 요약 표에서 이 카드로 이동할 때마다 증가 — 입력 영역을 연다 */
+  focusSeq?: number;
 }) {
   const [form, setForm] = useState<FormState>(() => initialForm(spec, overview?.prefill));
   const [result, setResult] = useState<Result | null>(overview?.result ?? null);
   const [serverMissing, setServerMissing] = useState<string[]>(overview?.missing ?? []);
   const [err, setErr] = useState<string>(overview?.error ?? "");
   const [busy, setBusy] = useState(false);
-  const [open, setOpen] = useState(true);
+  // 입력 영역은 기본 접힘. 자동 채움만으로 계산이 안 되는(입력이 필요한) 카드만 처음부터 연다.
+  const [open, setOpen] = useState(() => !overview?.result);
   const dirty = useRef(false);
   const seq = useRef(0);
 
@@ -106,6 +110,11 @@ export default function CalculatorCard({
     onResult?.(spec.id, result, missingSig ? missingSig.split(",") : []);
   }, [onResult, spec.id, result, missingSig]);
 
+  // 요약 표에서 「열기」로 이동해 오면 입력 영역을 펼친다
+  useEffect(() => {
+    if (focusSeq) setOpen(true);
+  }, [focusSeq]);
+
   const manualCount = Object.values(form).filter((f) => f.origin === "manual").length;
   const emptyCount = Object.values(form).filter((f) => f.origin === "empty").length;
   const hasPoints = !!result && result.details.some((d) => d.points !== null);
@@ -125,8 +134,8 @@ export default function CalculatorCard({
               자동 값으로 되돌리기
             </button>
           )}
-          <button type="button" className={btn.ghost} onClick={() => setOpen((v) => !v)} aria-expanded={open}>
-            {open ? "접기" : "펼치기"}
+          <button type="button" className={btn.secondary} onClick={() => setOpen((v) => !v)} aria-expanded={open}>
+            {open ? "입력 접기" : `입력 보기 (${counts.total})`}
           </button>
         </div>
       </header>
