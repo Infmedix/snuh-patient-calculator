@@ -1,0 +1,18 @@
+# 항목명 → 정규 변수 별칭 덮어쓰기 예시 (APP_VARIABLE_MAP_PATH).
+#
+# 변수명(backend/src/snapshot/variables.py 의 name) 아래에
+#   aliases:     별칭 목록을 통째로 교체
+#   add_aliases: 내장 별칭에 추가
+#   exclude:     제외 토큰 목록을 통째로 교체
+#   add_exclude: 내장 제외 토큰에 추가
+# ASCII 4자 이하 별칭은 토큰 정확 일치, 그 외는 소문자 부분 문자열 매칭.
+
+creatinine:
+  add_aliases: ["크레아티닌(혈청)", "Creatinine, serum"]
+  add_exclude: ["cystatin"]
+
+weight_kg:
+  add_aliases: ["몸무게"]
+
+urine_output_24h:
+  aliases: ["24시간 소변량", "Urine output (24h)"]

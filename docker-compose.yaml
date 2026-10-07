@@ -1,0 +1,33 @@
+services:
+  calculator:
+    build:
+      context: .
+      target: prod
+    image: snuh-patient-calculator:latest
+    env_file:
+      - .env
+    ports:
+      - "${API_PORT:-8010}:8000"
+    restart: unless-stopped
+    healthcheck:
+      # liveness — FHIR 왕복 없음 (FHIR 장애가 재시작 루프가 되면 안 된다)
+      test: ["CMD", "python", "-c", "import urllib.request,sys; sys.exit(0 if urllib.request.urlopen('http://127.0.0.1:8000/api/health', timeout=3).status == 200 else 1)"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+
+  # 테스트 전용 — mock 데이터로 돈다 (snuh-fhir 접속 없음).
+  #   docker compose --profile dev run --rm dev                  # 백엔드 전체 테스트
+  #   docker compose --profile dev run --rm dev pytest -q tests/test_calculators.py
+  dev:
+    profiles: ["dev"]
+    build:
+      context: .
+      target: dev
+    image: snuh-patient-calculator-dev:latest
+    environment:
+      - APP_LOG_LEVEL=WARNING
+      - APP_FHIR_MODE=mock
+    volumes:
+      - ./backend:/app/backend

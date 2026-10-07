@@ -1,0 +1,32 @@
+# Environment files (secrets)
+.env
+.env.*
+!.env.example
+
+# Python
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.venv/
+venv/
+*.egg-info/
+uv.lock
+
+# Frontend
+node_modules/
+frontend/dist/
+.vite/
+*.tsbuildinfo
+*.local
+
+# IDE / OS
+.idea/
+.vscode/
+.DS_Store
+*.swp
+
+# Logs
+*.log
+
+# Playwright MCP 산출물
+.playwright-mcp/
