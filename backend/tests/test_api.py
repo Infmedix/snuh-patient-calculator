@@ -54,7 +54,7 @@ def test_readiness_reports_service_token(monkeypatch):
 def test_list_calculators_exposes_specs_variables_flags(client):
     body = client.get("/api/calculators").json()
     ids = [c["id"] for c in body["items"]]
-    assert "sofa" in ids and len(ids) == 12
+    assert "sofa" in ids and len(ids) == 16
     sofa = next(c for c in body["items"] if c["id"] == "sofa")
     fio2 = next(i for i in sofa["inputs"] if i["key"] == "fio2")
     assert fio2["variable"] == "fio2" and fio2["auto"] is True
@@ -175,6 +175,14 @@ def test_overview_second_fixture_patient_computes_icu_scores(client):
     assert by_id["apache2"]["result"]["extra"]["aps"]["oxygenation"] == 1
     # CHA2DS2-VASc: 77세 여(2+1) + CHF(1) + HTN(1) = 5
     assert by_id["cha2ds2_vasc"]["result"]["value"] == 5
+    # qSOFA: RR 31(1) SBP 102(0) GCS 15(0) = 1 / NEWS2: RR 31(3) SpO2 91(3) O2(2) SBP 102(1) HR 108(1) alert(0) 38.9(1) = 11
+    assert by_id["qsofa"]["result"]["value"] == 1
+    assert by_id["news2"]["result"]["value"] == 11 and by_id["news2"]["prefill"]["on_oxygen"]["value"] is True
+    # FIB-4: 77*30/(180*sqrt(22)) = 2.74 → 65세 이상 하한 2.0, >2.67 높음
+    assert by_id["fib4"]["result"]["value"] == pytest.approx(2.74, abs=0.01)
+    # Charlson: CHF(1) + COPD(1) + 77세(3) = 5
+    assert by_id["charlson"]["prefill"]["chf"]["value"] is True and by_id["charlson"]["prefill"]["copd"]["value"] is True
+    assert by_id["charlson"]["result"]["value"] == 5
     # NRS-2002: 3개월 체중감소 51.5→48.0 = 6.8%(mild) 에 BMI 20.0 (<20.5) 이 겹쳐 moderate 제안
     assert by_id["nrs2002"]["prefill"]["nutrition_status"]["value"] == "moderate"
     assert by_id["nrs2002"]["prefill"]["weight_loss_3m_pct"]["value"] == pytest.approx(6.8, abs=0.05)

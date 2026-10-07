@@ -36,13 +36,38 @@ FLAGS: tuple[FlagDef, ...] = (
 )
 
 
+# ----- Charlson 동반질환 (Quan H et al. Med Care 2005 ICD-10 알고리즘) - 플래그 이름 "cci_" + 키 -----
+CHARLSON: tuple[FlagDef, ...] = (
+    FlagDef("cci_mi", "심근경색", ("I21", "I22", "I252")),
+    FlagDef("cci_chf", "울혈성 심부전", ("I099", "I110", "I130", "I132", "I255", "I420", "I425", "I426", "I427", "I428", "I429", "I43", "I50", "P290")),
+    FlagDef("cci_pvd", "말초혈관질환", ("I70", "I71", "I731", "I738", "I739", "I771", "I790", "I792", "K551", "K558", "K559", "Z958", "Z959")),
+    FlagDef("cci_cerebrovascular", "뇌혈관질환", ("G45", "G46", "H340") + _range("I", 60, 69)),
+    FlagDef("cci_dementia", "치매", ("F00", "F01", "F02", "F03", "F051", "G30", "G311")),
+    FlagDef("cci_copd", "만성 폐질환", ("I278", "I279") + _range("J", 40, 47) + _range("J", 60, 67) + ("J684", "J701", "J703")),
+    FlagDef("cci_rheumatic", "결합조직질환", ("M05", "M06", "M315", "M32", "M33", "M34", "M351", "M353", "M360")),
+    FlagDef("cci_pud", "소화성 궤양", _range("K", 25, 28)),
+    FlagDef("cci_mild_liver", "경증 간질환", ("B18", "K700", "K701", "K702", "K703", "K709", "K713", "K714", "K715", "K717", "K73", "K74",
+                                        "K760", "K762", "K763", "K764", "K768", "K769", "Z944")),
+    FlagDef("cci_diabetes", "당뇨 (합병증 없음)", tuple(f"E{n}{s}" for n in (10, 11, 12, 13, 14) for s in ("0", "1", "6", "8", "9"))),
+    FlagDef("cci_diabetes_complicated", "당뇨 (만성 합병증)", tuple(f"E{n}{s}" for n in (10, 11, 12, 13, 14) for s in ("2", "3", "4", "5", "7"))),
+    FlagDef("cci_hemiplegia", "편마비·하반신마비", ("G041", "G114", "G801", "G802", "G81", "G82", "G830", "G831", "G832", "G833", "G834", "G839")),
+    FlagDef("cci_renal", "중등도 이상 신질환", ("I120", "I131", "N032", "N033", "N034", "N035", "N036", "N037", "N052", "N053", "N054", "N055",
+                                          "N056", "N057", "N18", "N19", "N250", "Z490", "Z491", "Z492", "Z940", "Z992")),
+    FlagDef("cci_malignancy", "악성종양", _range("C", 0, 26) + _range("C", 30, 34) + _range("C", 37, 41) + ("C43",) + _range("C", 45, 58)
+            + _range("C", 60, 76) + _range("C", 81, 85) + ("C88",) + _range("C", 90, 97)),
+    FlagDef("cci_severe_liver", "중등도-중증 간질환", ("I850", "I859", "I864", "I982", "K704", "K711", "K721", "K729", "K765", "K766", "K767")),
+    FlagDef("cci_metastatic", "전이성 고형암", _range("C", 77, 80)),
+    FlagDef("cci_aids", "AIDS", ("B20", "B21", "B22", "B24")),
+)
+
+
 def normalize_code(code: str) -> str:
     return code.replace(".", "").replace(" ", "").upper()
 
 
 def derive_flags(conditions: list[ConditionItem]) -> dict[str, FlagEvidence]:
     out: dict[str, FlagEvidence] = {}
-    for f in FLAGS:
+    for f in FLAGS + CHARLSON:
         codes, displays = [], []
         for c in conditions:
             nc = normalize_code(c.code)
@@ -55,4 +80,4 @@ def derive_flags(conditions: list[ConditionItem]) -> dict[str, FlagEvidence]:
 
 
 def flag_labels() -> dict[str, str]:
-    return {f.name: f.label for f in FLAGS}
+    return {f.name: f.label for f in FLAGS + CHARLSON}

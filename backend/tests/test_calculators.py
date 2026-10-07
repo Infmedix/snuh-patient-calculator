@@ -24,8 +24,10 @@ def test_registry_has_all_twelve_calculators_in_display_order():
     assert ids == [
         "bmi", "egfr", "crcl",
         "cha2ds2_vasc", "has_bled", "qtc",
-        "child_pugh", "meld_na",
+        "child_pugh", "meld_na", "fib4",
+        "qsofa", "news2",
         "curb65", "sofa", "apache2",
+        "charlson",
         "nrs2002",
     ]
 
@@ -406,3 +408,90 @@ def test_nrs2002_below_three_is_not_at_risk():
     r = calc("nrs2002", nutrition_status="mild", disease_severity="mild", age=50)
     assert r.value == 2
     assert r.severity == "ok"
+
+
+# ===== qSOFA =====
+
+def test_qsofa_boundaries():
+    assert calc("qsofa", rr=21, sbp=101, gcs=15).value == 0
+    assert calc("qsofa", rr=22, sbp=100, gcs=14).value == 3
+    assert calc("qsofa", rr=22, sbp=120, gcs=15).severity == "warn"
+    assert calc("qsofa", rr=22, sbp=100, gcs=15).severity == "danger"
+
+
+# ===== NEWS2 =====
+
+def _news(**over):
+    base = dict(rr=16, spo2=97, spo2_scale="1", on_oxygen=False, sbp=120, hr=70, consciousness="alert", temp_c=36.8)
+    base.update(over)
+    return calc("news2", **base)
+
+
+def test_news2_healthy_is_zero():
+    assert _news().value == 0
+
+
+def test_news2_component_bands():
+    p = _news(rr=25, spo2=91, on_oxygen=True, sbp=90, hr=131, consciousness="cvpu", temp_c=35.0).extra["points"]
+    assert p == {"rr": 3, "spo2": 3, "oxygen": 2, "sbp": 3, "hr": 3, "consciousness": 3, "temp": 3}
+    assert _news(rr=21).extra["points"]["rr"] == 2 and _news(rr=11).extra["points"]["rr"] == 1
+    assert _news(spo2=95).extra["points"]["spo2"] == 1 and _news(spo2=93).extra["points"]["spo2"] == 2
+    assert _news(sbp=220).extra["points"]["sbp"] == 3 and _news(sbp=101).extra["points"]["sbp"] == 1
+    assert _news(hr=50).extra["points"]["hr"] == 1 and _news(hr=40).extra["points"]["hr"] == 3
+    assert _news(temp_c=38.1).extra["points"]["temp"] == 1 and _news(temp_c=39.1).extra["points"]["temp"] == 2
+
+
+def test_news2_scale2_spo2():
+    assert _news(spo2_scale="2", spo2=90).extra["points"]["spo2"] == 0
+    assert _news(spo2_scale="2", spo2=97, on_oxygen=True).extra["points"]["spo2"] == 3
+    assert _news(spo2_scale="2", spo2=97, on_oxygen=False).extra["points"]["spo2"] == 0
+    assert _news(spo2_scale="2", spo2=83).extra["points"]["spo2"] == 3
+
+
+def test_news2_risk_bands_and_single_parameter_rule():
+    assert _news().severity == "ok"
+    assert _news(hr=40).severity == "warn"            # 합계 3 이지만 한 항목 3점
+    assert _news(rr=25, sbp=100).value == 5 and _news(rr=25, sbp=100).severity == "warn"
+    assert _news(rr=25, sbp=90, hr=131).severity == "danger"
+
+
+# ===== FIB-4 =====
+
+def test_fib4_formula_and_bands():
+    import math
+    r = calc("fib4", age=50, ast=40, alt=40, platelets=200)
+    assert r.value == pytest.approx(50 * 40 / (200 * math.sqrt(40)), abs=0.01)   # 1.58 → 중간
+    assert r.severity == "warn"
+    assert calc("fib4", age=40, ast=30, alt=30, platelets=250).severity == "ok"    # 0.88
+    assert calc("fib4", age=50, ast=80, alt=40, platelets=100).severity == "danger"    # 6.32
+    assert calc("fib4", age=50, ast=80, alt=40, platelets=300).severity == "warn"      # 2.11
+    assert calc("fib4", age=70, ast=80, alt=40, platelets=300).value == pytest.approx(2.95, abs=0.01)
+
+
+def test_fib4_elderly_uses_higher_low_cut():
+    assert calc("fib4", age=70, ast=30, alt=30, platelets=200).value == pytest.approx(1.92, abs=0.01)
+    assert calc("fib4", age=70, ast=30, alt=30, platelets=200).severity == "ok"
+    assert calc("fib4", age=60, ast=30, alt=30, platelets=200).severity == "warn"     # 1.64 ≥ 1.3
+
+
+# ===== Charlson =====
+
+def _cci(**over):
+    base = {k: False for k in ("mi", "chf", "pvd", "cerebrovascular", "dementia", "copd", "rheumatic", "pud", "mild_liver",
+                              "diabetes", "diabetes_complicated", "hemiplegia", "renal", "malignancy", "severe_liver", "metastatic", "aids")}
+    base["age"] = 45
+    base.update(over)
+    return calc("charlson", **base)
+
+
+def test_charlson_weights_and_age():
+    assert _cci().value == 0
+    assert _cci(mi=True, chf=True).value == 2
+    assert _cci(renal=True, metastatic=True, age=75).value == 2 + 6 + 3
+    assert _cci(age=50).extra["age_points"] == 1 and _cci(age=80).extra["age_points"] == 4
+
+
+def test_charlson_hierarchy_does_not_double_count():
+    assert _cci(diabetes=True, diabetes_complicated=True).value == 2
+    assert _cci(mild_liver=True, severe_liver=True).value == 3
+    assert _cci(malignancy=True, metastatic=True).value == 6

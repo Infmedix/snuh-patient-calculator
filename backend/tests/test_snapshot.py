@@ -200,3 +200,19 @@ def test_flag_prefix_handles_dots_and_ranges():
     assert flags["bleeding_history"].present
     assert flags["malignancy"].present
     assert normalize_code("i 11.0") == "I110"
+
+
+def test_charlson_flags_from_fixture(snap):
+    f = snap.flags
+    assert f["cci_mild_liver"].present          # K746
+    assert f["cci_renal"].present               # N189
+    assert f["cci_cerebrovascular"].present     # I639
+    assert f["cci_diabetes"].present and not f["cci_diabetes_complicated"].present   # E119
+    assert not f["cci_chf"].present
+
+
+def test_charlson_quan_prefixes():
+    flags = derive_flags([ConditionItem(code="E11.5"), ConditionItem(code="C78.0"), ConditionItem(code="I25.2"), ConditionItem(code="J44.9")])
+    assert flags["cci_diabetes_complicated"].present and not flags["cci_diabetes"].present
+    assert flags["cci_metastatic"].present and not flags["cci_malignancy"].present
+    assert flags["cci_mi"].present and flags["cci_copd"].present

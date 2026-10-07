@@ -10,9 +10,13 @@ from src.calculators import bmi, egfr, crcl  # noqa: E402,F401
 # 심혈관
 from src.calculators import cha2ds2_vasc, has_bled, qtc  # noqa: E402,F401
 # 간
-from src.calculators import child_pugh, meld_na  # noqa: E402,F401
+from src.calculators import child_pugh, meld_na, fib4  # noqa: E402,F401
+# 조기경고
+from src.calculators import qsofa, news2  # noqa: E402,F401
 # 중증도
 from src.calculators import curb65, sofa, apache2  # noqa: E402,F401
+# 동반질환
+from src.calculators import charlson  # noqa: E402,F401
 # 영양
 from src.calculators import nrs2002  # noqa: E402,F401
 
