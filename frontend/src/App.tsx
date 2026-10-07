@@ -186,15 +186,15 @@ export default function App() {
   return (
     <div className="min-h-screen bg-gray-50">
       <header className="sticky top-0 z-10 border-b border-gray-200 bg-white/95 backdrop-blur">
-        <div className="mx-auto flex max-w-7xl flex-wrap items-center gap-x-6 gap-y-2 px-4 py-3">
-          <div>
+        <div className="mx-auto flex max-w-7xl flex-wrap items-center gap-x-6 gap-y-2 px-4 py-2 sm:py-3">
+          <div className="flex items-baseline gap-2">
             <span className="text-sm font-semibold text-gray-900">SNUH 환자 계산기</span>
-            <span className="ml-2 text-xs text-gray-400">환자 정보 기반 임상 점수 · 수치</span>
+            <span className="hidden text-xs text-gray-400 sm:inline">환자 정보 기반 임상 점수 · 수치</span>
           </div>
-          <form onSubmit={submit} className="flex flex-1 flex-wrap items-center gap-2 sm:min-w-[360px]">
+          <form onSubmit={submit} className="flex w-full flex-wrap items-center gap-2 sm:w-auto sm:flex-1 sm:min-w-[360px]">
             <input
               ref={inputRef}
-              className={`${input} max-w-[240px] font-mono`}
+              className={`${input} min-w-0 flex-1 font-mono sm:max-w-[240px] sm:flex-none`}
               placeholder="환자번호"
               value={draft}
               onChange={(e) => setDraft(e.target.value)}
@@ -212,7 +212,7 @@ export default function App() {
               </button>
             )}
           </form>
-          <div className="ml-auto flex items-center gap-2 text-xs text-gray-500">
+          <div className="flex items-center gap-2 text-xs text-gray-500 sm:ml-auto">
             {patRelevant && (
               <button
                 type="button"
@@ -260,12 +260,13 @@ export default function App() {
           </div>
         )}
 
-        <div className="grid gap-5 lg:grid-cols-[320px_minmax(0,1fr)]">
-          <aside className="lg:sticky lg:top-[64px] lg:self-start">
+        {/* grid-cols 에 minmax(0,…)·min-w-0 — 표·nowrap 셀의 최소 너비가 폰 화면을 넘어 가로 스크롤을 만들지 않게 */}
+        <div className="grid grid-cols-[minmax(0,1fr)] gap-5 lg:grid-cols-[320px_minmax(0,1fr)]">
+          <aside className="min-w-0 lg:sticky lg:top-[64px] lg:self-start">
             <PatientPanel overview={overview} variables={specs?.variables ?? {}} loading={loading} />
           </aside>
 
-          <section>
+          <section className="min-w-0">
             {!specs && !specsErr && <p className="text-sm text-gray-500">계산기 목록 불러오는 중…</p>}
             {specs && (
               <>

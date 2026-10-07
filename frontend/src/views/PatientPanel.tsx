@@ -1,4 +1,13 @@
 import { useMemo, useState } from "react";
+
+/** 넓은 화면(lg)에서는 값 표를 펼쳐 두고, 폰에서는 접어 둬 계산기 카드가 먼저 보이게 한다. */
+function wideScreen(): boolean {
+  try {
+    return typeof window !== "undefined" && window.matchMedia("(min-width: 1024px)").matches;
+  } catch {
+    return true;
+  }
+}
 import type { Overview } from "../api";
 import { CATEGORY_LABEL, SEX_LABEL, daysAgo, fmtDate, fmtDateTime, fmtNum } from "../format";
 import { Tag, btn, td, th } from "../ui";
@@ -14,6 +23,7 @@ export default function PatientPanel({
   loading: boolean;
 }) {
   const [showConditions, setShowConditions] = useState(false);
+  const [showValues, setShowValues] = useState<boolean>(() => wideScreen());
 
   const rows = useMemo(() => {
     if (!overview) return [];
@@ -107,11 +117,18 @@ export default function PatientPanel({
       )}
 
       <section className="rounded-lg border border-gray-200 bg-white">
-        <div className="flex items-center justify-between px-4 pt-3">
+        <button
+          type="button"
+          className="flex w-full items-center justify-between px-4 py-3 text-left"
+          onClick={() => setShowValues((v) => !v)}
+          aria-expanded={showValues}
+        >
           <h2 className="text-xs font-semibold text-gray-500">가져온 값 (변수별 최근 1건)</h2>
-          <span className="text-[11px] text-gray-400">{rows.length}개</span>
-        </div>
-        {rows.length === 0 ? (
+          <span className="text-[11px] text-gray-400">
+            {rows.length}개 {showValues ? "▴" : "▾"}
+          </span>
+        </button>
+        {!showValues ? null : rows.length === 0 ? (
           <p className="px-4 py-3 text-xs text-gray-400">조회 기간 안에 매칭되는 기록이 없습니다.</p>
         ) : (
           <div className="max-h-[60vh] overflow-y-auto overflow-x-hidden px-2 pb-2">

@@ -37,14 +37,14 @@ export default function SummaryTable({
           계산 완료 {done}/{specs.length}
         </Tag>
       </div>
-      <table className="w-full border-t border-gray-100">
+      <table className="w-full table-fixed border-t border-gray-100 sm:table-auto">
         <thead>
           <tr className="bg-gray-50">
-            <th className={th}>그룹</th>
+            <th className={`${th} hidden sm:table-cell`}>그룹</th>
             <th className={th}>계산기</th>
             <th className={`${th} text-right`}>결과</th>
             <th className={th}>해석</th>
-            <th className={th}></th>
+            <th className={`${th} hidden sm:table-cell`}></th>
           </tr>
         </thead>
         <tbody>
@@ -60,10 +60,11 @@ export default function SummaryTable({
                   onClick={() => onJump(s.id)}
                   title="카드로 이동"
                 >
-                  <td className={`${td} whitespace-nowrap text-xs text-gray-400`}>{idx === 0 ? g.name : ""}</td>
+                  <td className={`${td} hidden whitespace-nowrap text-xs text-gray-400 sm:table-cell`}>{idx === 0 ? g.name : ""}</td>
                   <td className={td}>
                     <div className="font-medium text-gray-900">{s.name}</div>
-                    <div className="text-[11px] text-gray-400">{s.description}</div>
+                    <div className="text-[11px] text-gray-400 sm:hidden">{g.name}</div>
+                    <div className="hidden text-[11px] text-gray-400 sm:block">{s.description}</div>
                   </td>
                   <td className={`${td} whitespace-nowrap text-right font-mono`}>
                     {res ? (
@@ -89,7 +90,7 @@ export default function SummaryTable({
                       </span>
                     )}
                   </td>
-                  <td className={`${td} whitespace-nowrap text-right text-xs text-indigo-600`}>열기 ›</td>
+                  <td className={`${td} hidden whitespace-nowrap text-right text-xs text-indigo-600 sm:table-cell`}>열기 ›</td>
                 </tr>
               );
             }),

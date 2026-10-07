@@ -122,7 +122,7 @@ export default function CalculatorCard({
   return (
     <article id={`calc-${spec.id}`} className={`scroll-mt-20 rounded-lg border border-gray-200 border-l-4 bg-white ${bar}`}>
       {/* ---------- 머리 ---------- */}
-      <header className="flex items-start gap-4 px-5 pt-4">
+      <header className="flex flex-col gap-3 px-4 pt-4 sm:flex-row sm:items-start sm:gap-4 sm:px-5">
         <div className="min-w-0 flex-1">
           <h3 className="text-base font-semibold text-gray-900">{spec.name}</h3>
           <p className="text-sm text-gray-600">{spec.description}</p>
@@ -132,7 +132,7 @@ export default function CalculatorCard({
             {emptyCount > 0 && <span className="text-amber-700"> · 비어 있음 {emptyCount}</span>}
           </p>
         </div>
-        <div className="flex shrink-0 flex-col items-end gap-1.5">
+        <div className="flex shrink-0 flex-row items-center gap-2 sm:flex-col sm:items-end sm:gap-1.5">
           <button
             type="button"
             className={`${btn.secondary} w-[120px] whitespace-nowrap`}
@@ -151,11 +151,11 @@ export default function CalculatorCard({
       </header>
 
       {/* ---------- 결과 ---------- */}
-      <section className={`px-5 pt-4 ${open ? "" : "pb-4"}`}>
+      <section className={`px-4 pt-4 sm:px-5 ${open ? "" : "pb-4"}`}>
         {result ? (
           <div className={`rounded-md border px-4 py-3 ${RESULT_BG[result.severity]}`}>
             <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
-              <span className="font-mono text-3xl font-semibold text-gray-900">
+              <span className="font-mono text-2xl font-semibold text-gray-900 sm:text-3xl">
                 {fmtNum(result.value, 1)}
                 {result.unit && <span className="ml-1 text-base font-normal text-gray-500">{result.unit}</span>}
               </span>
@@ -214,7 +214,7 @@ export default function CalculatorCard({
       </section>
 
       {/* ---------- 입력 ---------- */}
-      <section id={`inputs-${spec.id}`} className="px-5 py-4" hidden={!open}>
+      <section id={`inputs-${spec.id}`} className="px-4 py-4 sm:px-5" hidden={!open}>
         <h4 className="mb-2 text-xs font-semibold uppercase tracking-wide text-gray-500">입력값</h4>
         <div className="grid gap-2 sm:grid-cols-2">
           {spec.inputs.map((i) => (
@@ -225,7 +225,7 @@ export default function CalculatorCard({
 
       {/* ---------- 참고 ---------- */}
       {(result?.notes.length || spec.references.length) ? (
-        <footer className="border-t border-gray-100 px-5 py-3">
+        <footer className="border-t border-gray-100 px-4 py-3 sm:px-5">
           {result && result.notes.length > 0 && (
             <ul className="space-y-1 text-xs leading-relaxed text-gray-600">
               {result.notes.map((n, idx) => (
