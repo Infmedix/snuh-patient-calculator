@@ -2,7 +2,10 @@ import { useMemo, useState } from "react";
 import type { CalculatorSpec, Result } from "../api";
 import { copyText, summaryText, type CopyContext } from "../copy";
 import { fmtNum } from "../format";
-import { SEVERITY_TONE, Tag, btn, input, td, th } from "../ui";
+import { SEVERITY_TONE, Tag, btn, input } from "../ui";
+
+const th = "px-3 py-2.5 text-left text-xs font-semibold text-gray-500 whitespace-nowrap sm:px-4";
+const td = "px-3 py-3 align-middle text-sm text-gray-800 sm:px-4";
 
 export interface LiveResult {
   result: Result | null;
@@ -60,7 +63,7 @@ export default function SummaryTable({
     const fav = favorites.includes(spec.id);
     return (
       <tr key={spec.id} className="cursor-pointer border-t border-gray-100 hover:bg-indigo-50/40" onClick={() => onJump(spec.id)} title="카드로 이동">
-        <td className={`${td} w-8 pr-0`}>
+        <td className={`${td} w-10 pr-0`}>
           <button
             type="button"
             className={`text-lg leading-none ${fav ? "text-amber-500" : "text-gray-300 hover:text-amber-400"}`}
@@ -179,15 +182,17 @@ export default function SummaryTable({
         </div>
       )}
 
-      {searched ? (
-        searched.length ? (
-          renderTable([searched])
+      <div className="border-t border-gray-100 px-2 pb-3 pt-1 sm:px-3">
+        {searched ? (
+          searched.length ? (
+            renderTable([searched])
+          ) : (
+            <p className="px-2 py-3 text-xs text-gray-400">「{query}」에 맞는 계산기가 없습니다.</p>
+          )
         ) : (
-          <p className="border-t border-gray-100 px-4 py-3 text-xs text-gray-400">「{query}」에 맞는 계산기가 없습니다.</p>
-        )
-      ) : (
-        renderTable([starred, rest])
-      )}
+          renderTable([starred, rest])
+        )}
+      </div>
     </section>
   );
 }
