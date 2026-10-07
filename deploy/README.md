@@ -19,7 +19,7 @@
 
 ```bash
 # 1) 이미지 — 태그 = 당일 YYMMDD + v1, v2…  (deploy/build-and-save.sh 가 빌드·save 를 한다)
-TAG=261007v3
+TAG=261007v4
 sh deploy/build-and-save.sh $TAG            # → dist/snuh-patient-calculator-$TAG.tar
 #    → 업로더 ① (http://<호스트>/upload): project=snuh-patient-calculator, tag=$TAG
 #      → registry.internal/airgap/snuh-patient-calculator:$TAG
