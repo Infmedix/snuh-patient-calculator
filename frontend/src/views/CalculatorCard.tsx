@@ -357,7 +357,7 @@ function Field({
             <input
               type="text"
               inputMode="decimal"
-              className={`${input} max-w-[180px] font-mono`}
+              className={`${input} max-w-[180px]`}
               value={String(st.value)}
               onChange={(e) => onChange(e.target.value)}
               placeholder={spec.required ? "필수" : "선택"}

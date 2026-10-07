@@ -227,7 +227,7 @@ export default function App() {
           <form onSubmit={submit} className="flex w-full flex-wrap items-center gap-2 sm:w-auto sm:flex-1 sm:min-w-[360px]">
             <input
               ref={inputRef}
-              className={`${input} min-w-0 flex-1 font-mono sm:max-w-[240px] sm:flex-none`}
+              className={`${input} min-w-0 flex-1 sm:max-w-[240px] sm:flex-none`}
               placeholder="환자번호"
               value={draft}
               onChange={(e) => setDraft(e.target.value)}

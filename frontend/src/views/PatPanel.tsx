@@ -65,7 +65,7 @@ export default function PatPanel({
           <label className="block min-w-[280px] flex-1 text-xs text-gray-600">
             토큰
             <input
-              className={`${input} mt-1 font-mono`}
+              className={`${input} mt-1`}
               type="password"
               autoComplete="new-password"
               spellCheck={false}
