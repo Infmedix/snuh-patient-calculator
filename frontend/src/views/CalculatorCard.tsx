@@ -3,29 +3,39 @@ import { ApiError, calculate, errorMessage, type CalculatorOverview, type Calcul
 import { CATEGORY_LABEL, daysAgo, fmtDateTime, fmtNum } from "../format";
 import { autoCount, initialForm, missingRequired, setField, toPayload, type FieldState, type FormState } from "../inputs";
 import { SEVERITY_BAR, SEVERITY_TONE, Tag, btn, input, type Tone } from "../ui";
+import ScaleBar from "./ScaleBar";
 
 const ORIGIN_TAG: Record<FieldState["origin"], { label: string; tone: Tone } | null> = {
-  fhir: { label: "FHIR", tone: "indigo" },
+  fhir: { label: "FHIR 기록", tone: "indigo" },
   patient: { label: "환자정보", tone: "indigo" },
-  derived: { label: "계산", tone: "sky" },
-  condition: { label: "진단", tone: "indigo" },
-  manual: { label: "직접", tone: "gray" },
-  default: null,
+  derived: { label: "자동 계산", tone: "sky" },
+  condition: { label: "진단 코드", tone: "indigo" },
+  manual: { label: "직접 입력", tone: "gray" },
+  default: { label: "기본값", tone: "gray" },
   empty: null,
 };
 
+const RESULT_BG: Record<Result["severity"], string> = {
+  ok: "bg-emerald-50 border-emerald-200",
+  info: "bg-sky-50 border-sky-200",
+  warn: "bg-amber-50 border-amber-200",
+  danger: "bg-red-50 border-red-200",
+};
+
 /**
- * 계산기 카드 — 결과 + 스펙 기반 입력 폼. 입력이 바뀌면 300ms 뒤 서버에 재계산을 요청한다.
+ * 계산기 카드 — 위에서 아래로 「결과 → 입력 → 참고」. 입력이 바뀌면 300ms 뒤 서버에 재계산을 요청한다.
  * 환자가 바뀌면 부모가 key 를 바꿔 다시 마운트한다 (폼을 prefill 로 재생성).
  */
 export default function CalculatorCard({
   spec,
   overview,
-  flagLabels,
+  onResult,
 }: {
   spec: CalculatorSpec;
   overview: CalculatorOverview | undefined;
-  flagLabels: Record<string, string>;
+  flagLabels?: Record<string, string>;
+  /** 현재 결과(사용자 수정 반영)를 부모에 보고 — 요약 표·탭 배지용 */
+  onResult?: (id: string, result: Result | null, missing: string[]) => void;
 }) {
   const [form, setForm] = useState<FormState>(() => initialForm(spec, overview?.prefill));
   const [result, setResult] = useState<Result | null>(overview?.result ?? null);
@@ -88,100 +98,155 @@ export default function CalculatorCard({
     setErr(overview?.error ?? "");
   }
 
-  const missingKeys = result ? [] : (serverMissing.length ? serverMissing : missing);
+  const missingKeys = result ? [] : serverMissing.length ? serverMissing : missing;
   const bar = result ? SEVERITY_BAR[result.severity] : "border-l-gray-300";
 
+  const missingSig = missingKeys.join(",");
+  useEffect(() => {
+    onResult?.(spec.id, result, missingSig ? missingSig.split(",") : []);
+  }, [onResult, spec.id, result, missingSig]);
+
+  const manualCount = Object.values(form).filter((f) => f.origin === "manual").length;
+  const emptyCount = Object.values(form).filter((f) => f.origin === "empty").length;
+  const hasPoints = !!result && result.details.some((d) => d.points !== null);
+
   return (
-    <article className={`flex flex-col rounded-lg border border-gray-200 border-l-4 bg-white ${bar}`}>
-      <header className="flex items-start gap-2 px-4 pt-3">
+    <article id={`calc-${spec.id}`} className={`scroll-mt-20 rounded-lg border border-gray-200 border-l-4 bg-white ${bar}`}>
+      {/* ---------- 머리 ---------- */}
+      <header className="flex flex-wrap items-start gap-x-4 gap-y-2 px-5 pt-4">
         <div className="min-w-0 flex-1">
-          <h3 className="text-sm font-semibold text-gray-900">{spec.name}</h3>
-          <p className="truncate text-xs text-gray-500" title={spec.description}>
-            {spec.description}
-          </p>
+          <h3 className="text-base font-semibold text-gray-900">{spec.name}</h3>
+          <p className="text-sm text-gray-600">{spec.description}</p>
+          {spec.guide && <p className="mt-1 max-w-3xl text-xs leading-relaxed text-gray-500">{spec.guide}</p>}
         </div>
-        <button type="button" className={btn.ghost} onClick={() => setOpen((v) => !v)} aria-expanded={open}>
-          {open ? "입력 접기" : "입력 펼치기"}
-        </button>
+        <div className="flex items-center gap-2">
+          {dirty.current && (
+            <button type="button" className={btn.secondary} onClick={reset}>
+              자동 값으로 되돌리기
+            </button>
+          )}
+          <button type="button" className={btn.ghost} onClick={() => setOpen((v) => !v)} aria-expanded={open}>
+            {open ? "접기" : "펼치기"}
+          </button>
+        </div>
       </header>
 
-      <div className="px-4 pt-2">
+      {/* ---------- 결과 ---------- */}
+      <section className="px-5 pt-4">
         {result ? (
-          <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
-            <span className="font-mono text-2xl font-semibold text-gray-900">
-              {fmtNum(result.value, 1)}
-              {result.unit && <span className="ml-1 text-sm font-normal text-gray-500">{result.unit}</span>}
-            </span>
-            <Tag tone={SEVERITY_TONE[result.severity]}>{result.label}</Tag>
-            {busy && <span className="text-[11px] text-gray-400">계산 중…</span>}
+          <div className={`rounded-md border px-4 py-3 ${RESULT_BG[result.severity]}`}>
+            <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
+              <span className="font-mono text-3xl font-semibold text-gray-900">
+                {fmtNum(result.value, 1)}
+                {result.unit && <span className="ml-1 text-base font-normal text-gray-500">{result.unit}</span>}
+              </span>
+              <Tag tone={SEVERITY_TONE[result.severity]}>{result.label}</Tag>
+              {busy && <span className="text-[11px] text-gray-400">다시 계산 중…</span>}
+            </div>
+            {spec.scale && <ScaleBar scale={spec.scale} value={result.value} unit={result.unit} />}
+
+            {result.details.length > 0 && (
+              <details className="mt-3 text-sm">
+                <summary className="cursor-pointer select-none text-xs font-semibold text-gray-600 hover:text-gray-900">
+                  {hasPoints ? "점수 구성 보기" : "계산에 쓴 값 보기"}
+                </summary>
+                <table className="mt-1 w-full">
+                  <tbody>
+                    {result.details.map((d, idx) => (
+                      <tr key={idx} className="border-t border-black/5 align-top">
+                        <td className="py-1 pr-2 text-gray-600">{d.label}</td>
+                        <td className="py-1 text-gray-900">{d.text}</td>
+                        <td className="py-1 pl-2 text-right font-mono text-gray-800">
+                          {d.points !== null ? (d.points > 0 ? `+${fmtNum(d.points, 0)}` : "0") : ""}
+                        </td>
+                      </tr>
+                    ))}
+                    {hasPoints && (
+                      <tr className="border-t border-black/10 font-semibold">
+                        <td className="py-1 pr-2 text-gray-700" colSpan={2}>
+                          합계
+                        </td>
+                        <td className="py-1 pl-2 text-right font-mono text-gray-900">{fmtNum(result.value, 1)}</td>
+                      </tr>
+                    )}
+                  </tbody>
+                </table>
+              </details>
+            )}
           </div>
         ) : (
-          <div className="text-sm text-gray-500">
+          <div className="rounded-md border border-dashed border-amber-300 bg-amber-50/40 px-4 py-3">
             {busy ? (
-              "계산 중…"
-            ) : missingKeys.length ? (
-              <>
-                <span className="font-medium text-amber-700">입력 필요</span>
-                <span className="ml-1 text-xs text-gray-500">{missingKeys.map((k) => labelOf(spec, k)).join(", ")}</span>
-              </>
+              <p className="text-sm text-gray-500">계산 중…</p>
             ) : (
-              "결과 없음"
+              <>
+                <p className="text-sm font-medium text-amber-800">아직 계산할 수 없습니다</p>
+                {missingKeys.length > 0 && (
+                  <p className="mt-1 text-xs text-amber-800">
+                    아래에서 다음 값을 채워 주세요: <b>{missingKeys.map((k) => labelOf(spec, k)).join(", ")}</b>
+                  </p>
+                )}
+                {spec.scale && <ScaleBar scale={spec.scale} value={null} unit={null} />}
+              </>
             )}
           </div>
         )}
-        {err && <p className="mt-1 text-xs text-red-700">{err}</p>}
-        <p className="mt-1 text-[11px] text-gray-400">
-          자동 채움 {counts.auto}/{counts.total}
-          {dirty.current && (
-            <>
-              {" · "}
-              <button type="button" className="underline hover:text-gray-600" onClick={reset}>
-                자동 값으로 되돌리기
-              </button>
-            </>
-          )}
-        </p>
-      </div>
+        {err && <p className="mt-2 rounded border border-red-200 bg-red-50 px-3 py-2 text-xs text-red-800">{err}</p>}
+      </section>
 
+      {/* ---------- 입력 ---------- */}
       {open && (
-        <div className="mt-3 space-y-1.5 border-t border-gray-100 px-4 py-3">
-          {spec.inputs.map((i) => (
-            <Field key={i.key} spec={i} state={form[i.key]} onChange={(v) => change(i.key, v)} flagLabels={flagLabels}
-                   missing={missingKeys.includes(i.key)} />
-          ))}
-        </div>
+        <section className="px-5 py-4">
+          <div className="mb-2 flex items-baseline justify-between">
+            <h4 className="text-xs font-semibold uppercase tracking-wide text-gray-500">입력</h4>
+            <p className="text-[11px] text-gray-400">
+              자동 {counts.auto} · 직접 {manualCount} · 비어 있음 {emptyCount} / 총 {counts.total}
+            </p>
+          </div>
+          <div className="grid gap-2 sm:grid-cols-2">
+            {spec.inputs.map((i) => (
+              <Field key={i.key} spec={i} state={form[i.key]} onChange={(v) => change(i.key, v)} missing={missingKeys.includes(i.key)} />
+            ))}
+          </div>
+        </section>
       )}
 
-      {result && (result.details.length > 0 || result.notes.length > 0) && (
-        <div className="border-t border-gray-100 px-4 py-3">
-          {result.details.length > 0 && (
-            <table className="w-full text-xs">
-              <tbody>
-                {result.details.map((d, idx) => (
-                  <tr key={idx} className="align-top">
-                    <td className="py-0.5 pr-2 text-gray-500">{d.label}</td>
-                    <td className="py-0.5 text-gray-800">{d.text}</td>
-                    <td className="py-0.5 pl-2 text-right font-mono text-gray-700">{d.points !== null ? `+${fmtNum(d.points, 0)}` : ""}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          )}
-          {result.notes.length > 0 && (
-            <ul className="mt-2 space-y-0.5 text-[11px] text-gray-500">
+      {/* ---------- 참고 ---------- */}
+      {(result?.notes.length || spec.references.length) ? (
+        <footer className="border-t border-gray-100 px-5 py-3">
+          {result && result.notes.length > 0 && (
+            <ul className="space-y-1 text-xs leading-relaxed text-gray-600">
               {result.notes.map((n, idx) => (
-                <li key={idx}>· {n}</li>
+                <li key={idx} className="flex gap-1.5">
+                  <span className="text-gray-300">•</span>
+                  <span>{n}</span>
+                </li>
               ))}
             </ul>
           )}
-        </div>
-      )}
+          {spec.references.length > 0 && <p className="mt-2 text-[11px] text-gray-400">출전: {spec.references.join(" · ")}</p>}
+        </footer>
+      ) : null}
     </article>
   );
 }
 
 function labelOf(spec: CalculatorSpec, key: string): string {
   return spec.inputs.find((i) => i.key === key)?.label ?? key;
+}
+
+/** 출처 한 줄 — 「검사 · Creatinine 1.8 mg/dL · 2026-10-05 08:30 (2일 전)」 */
+function sourceLine(spec: InputSpec, st: FieldState): { text: string; stale: boolean } {
+  const src = st.source;
+  if (src) {
+    const cat = CATEGORY_LABEL[src.category] ?? src.category;
+    const when = src.observed_at ? ` · ${fmtDateTime(src.observed_at)} (${daysAgo(src.observed_at)})` : "";
+    return { text: `${cat} · ${src.text}${when}`, stale: src.stale };
+  }
+  if (st.origin === "manual") return { text: "직접 입력한 값", stale: false };
+  if (st.origin === "default") return { text: spec.help ? `기본값 · ${spec.help}` : "기본값 — 해당하면 바꿔 주세요", stale: false };
+  if (spec.help) return { text: spec.help, stale: false };
+  return { text: spec.required ? "기록에서 찾지 못했습니다 — 직접 입력해 주세요" : "선택 입력", stale: false };
 }
 
 function Field({
@@ -193,76 +258,73 @@ function Field({
   spec: InputSpec;
   state: FieldState | undefined;
   onChange: (v: string | boolean) => void;
-  flagLabels: Record<string, string>;
   missing: boolean;
 }) {
   const st = state ?? { value: spec.type === "boolean" ? false : "", origin: "empty" as const, source: null };
   const tag = ORIGIN_TAG[st.origin];
-  const src = st.source;
-  const title = src ? `${CATEGORY_LABEL[src.category] ?? src.category} · ${src.text}${src.observed_at ? `\n${fmtDateTime(src.observed_at)}` : ""}` : spec.help ?? "";
-
-  const meta = (
-    <span className="flex shrink-0 items-center gap-1" title={title}>
-      {tag && <Tag tone={tag.tone}>{tag.label}</Tag>}
-      {src?.observed_at && (
-        <span className={`text-[11px] ${src.stale ? "text-amber-700" : "text-gray-400"}`}>{daysAgo(src.observed_at)}</span>
-      )}
-      {src && !src.observed_at && (src.category === "derived" || src.category === "patient") && (
-        <span className="max-w-[140px] truncate text-[11px] text-gray-400">{src.text}</span>
-      )}
-    </span>
-  );
+  const src = sourceLine(spec, st);
+  const box = `rounded-md border p-2.5 ${missing ? "border-amber-300 bg-amber-50/50" : "border-gray-200"}`;
+  const srcCls = `mt-1 text-[11px] leading-snug ${src.stale ? "text-amber-700" : "text-gray-500"}`;
 
   if (spec.type === "boolean") {
     return (
-      <label className="flex items-center gap-2 text-sm text-gray-800" title={title}>
-        <input type="checkbox" className="h-4 w-4 accent-indigo-600" checked={st.value === true} onChange={(e) => onChange(e.target.checked)} />
-        <span className="flex-1">{spec.label}</span>
-        {meta}
-      </label>
-    );
-  }
-
-  const labelCls = `text-xs ${missing ? "text-amber-700" : "text-gray-600"}`;
-  if (spec.type === "select") {
-    return (
-      <label className="grid grid-cols-[1fr_auto] items-center gap-x-2 gap-y-0.5" title={title}>
-        <span className={labelCls}>
-          {spec.label}
-          {spec.required && <span className="text-amber-600"> *</span>}
-        </span>
-        {meta}
-        <select className={`${input} col-span-2`} value={String(st.value)} onChange={(e) => onChange(e.target.value)}>
-          <option value="">선택…</option>
-          {spec.options?.map((o) => (
-            <option key={o.value} value={o.value}>
-              {o.label}
-            </option>
-          ))}
-        </select>
-      </label>
+      <div className={box}>
+        <label className="flex items-start gap-2">
+          <input
+            type="checkbox"
+            className="mt-0.5 h-4 w-4 shrink-0 accent-indigo-600"
+            checked={st.value === true}
+            onChange={(e) => onChange(e.target.checked)}
+          />
+          <span className="flex-1 text-sm text-gray-800">{spec.label}</span>
+          {tag && <Tag tone={tag.tone}>{tag.label}</Tag>}
+        </label>
+        <p className={`${srcCls} ml-6`}>
+          {src.text}
+          {src.stale ? " · 오래된 기록" : ""}
+        </p>
+      </div>
     );
   }
 
   return (
-    <label className="grid grid-cols-[1fr_auto] items-center gap-x-2 gap-y-0.5" title={title}>
-      <span className={labelCls}>
-        {spec.label}
-        {spec.required && <span className="text-amber-600"> *</span>}
-        {spec.help && !src && <span className="ml-1 text-[11px] text-gray-400">{spec.help}</span>}
-      </span>
-      {meta}
-      <div className="col-span-2 flex items-center gap-1">
-        <input
-          type="text"
-          inputMode="decimal"
-          className={`${input} font-mono ${missing ? "border-amber-300" : ""}`}
-          value={String(st.value)}
-          onChange={(e) => onChange(e.target.value)}
-          placeholder={spec.required ? "필수" : "선택"}
-        />
-        {spec.unit && <span className="w-20 shrink-0 truncate text-xs text-gray-500" title={spec.unit}>{spec.unit}</span>}
+    <div className={box}>
+      <div className="flex items-center justify-between gap-2">
+        <label className="text-sm font-medium text-gray-800">
+          {spec.label}
+          {spec.required && <span className="ml-0.5 text-amber-600">*</span>}
+        </label>
+        {tag && <Tag tone={tag.tone}>{tag.label}</Tag>}
+        {!tag && missing && <Tag tone="amber">입력 필요</Tag>}
       </div>
-    </label>
+      <div className="mt-1.5 flex items-center gap-2">
+        {spec.type === "select" ? (
+          <select className={input} value={String(st.value)} onChange={(e) => onChange(e.target.value)}>
+            <option value="">선택…</option>
+            {spec.options?.map((o) => (
+              <option key={o.value} value={o.value}>
+                {o.label}
+              </option>
+            ))}
+          </select>
+        ) : (
+          <>
+            <input
+              type="text"
+              inputMode="decimal"
+              className={`${input} max-w-[180px] font-mono`}
+              value={String(st.value)}
+              onChange={(e) => onChange(e.target.value)}
+              placeholder={spec.required ? "필수" : "선택"}
+            />
+            {spec.unit && <span className="text-sm text-gray-500">{spec.unit}</span>}
+          </>
+        )}
+      </div>
+      <p className={srcCls}>
+        {src.text}
+        {src.stale ? " · 오래된 기록" : ""}
+      </p>
+    </div>
   );
 }

@@ -84,6 +84,19 @@ export interface InputSpec {
   options?: { value: string; label: string }[];
 }
 
+export interface Band {
+  upto: number | null;
+  label: string;
+  severity: Severity;
+}
+
+export interface Scale {
+  min: number;
+  max: number;
+  bands: Band[];
+  note: string | null;
+}
+
 export interface CalculatorSpec {
   id: string;
   name: string;
@@ -91,6 +104,8 @@ export interface CalculatorSpec {
   description: string;
   inputs: InputSpec[];
   references: string[];
+  scale: Scale | null;
+  guide: string | null;
 }
 
 export interface Detail {

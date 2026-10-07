@@ -7,13 +7,16 @@ import {
   type CalculatorOverview,
   type CalculatorsResponse,
   type Overview,
+  type Result,
 } from "./api";
 import { ErrorBox, Tag, btn, input } from "./ui";
 import CalculatorCard from "./views/CalculatorCard";
 import PatientPanel from "./views/PatientPanel";
+import SummaryTable, { type LiveResult } from "./views/SummaryTable";
 
 /** 그룹 표시 순서 — 백엔드 레지스트리 순서와 같다. 서버가 새 그룹을 보내면 뒤에 붙는다. */
 const GROUP_ORDER = ["신체·신장", "심혈관", "간", "중증도", "영양"];
+const SUMMARY_TAB = "요약";
 
 export default function App() {
   const [specs, setSpecs] = useState<CalculatorsResponse | null>(null);
@@ -26,6 +29,9 @@ export default function App() {
   const [loadErr, setLoadErr] = useState("");
   // 카드 초기화 키 — 새 환자를 불러오면 카드 폼을 prefill 로 다시 만든다
   const [epoch, setEpoch] = useState(0);
+  const [tab, setTab] = useState<string>(SUMMARY_TAB);
+  // 카드가 보고하는 현재 결과 (사용자 수정 반영) — 요약 표·탭 배지가 쓴다
+  const [live, setLive] = useState<Record<string, LiveResult>>({});
   const inputRef = useRef<HTMLInputElement>(null);
 
   const loadSpecs = useCallback(() => {
@@ -39,25 +45,24 @@ export default function App() {
   }, []);
   useEffect(loadSpecs, [loadSpecs]);
 
-  const loadPatient = useCallback(
-    async (pid: string) => {
-      const id = pid.trim();
-      if (!id) return;
-      setLoading(true);
-      setLoadErr("");
-      try {
-        const ov = await fetchOverview(id);
-        setOverview(ov);
-        setEpoch((n) => n + 1);
-        window.location.hash = `#/p/${encodeURIComponent(id)}`;
-      } catch (e) {
-        setLoadErr(errorMessage(e));
-      } finally {
-        setLoading(false);
-      }
-    },
-    [],
-  );
+  const loadPatient = useCallback(async (pid: string) => {
+    const id = pid.trim();
+    if (!id) return;
+    setLoading(true);
+    setLoadErr("");
+    try {
+      const ov = await fetchOverview(id);
+      setOverview(ov);
+      setLive({});
+      setEpoch((n) => n + 1);
+      setTab(SUMMARY_TAB);
+      window.location.hash = `#/p/${encodeURIComponent(id)}`;
+    } catch (e) {
+      setLoadErr(errorMessage(e));
+    } finally {
+      setLoading(false);
+    }
+  }, []);
 
   // `#/p/{환자번호}` 딥링크 — 새로고침·공유 시 같은 환자를 다시 불러온다
   useEffect(() => {
@@ -78,10 +83,19 @@ export default function App() {
     setOverview(null);
     setDraft("");
     setLoadErr("");
+    setLive({});
     setEpoch((n) => n + 1);
     window.location.hash = "";
     inputRef.current?.focus();
   }
+
+  const onResult = useCallback((id: string, result: Result | null, missing: string[]) => {
+    setLive((cur) => {
+      const prev = cur[id];
+      if (prev && prev.result === result && prev.missing.join() === missing.join()) return cur;
+      return { ...cur, [id]: { result, missing } };
+    });
+  }, []);
 
   const byId = useMemo(() => {
     const m = new Map<string, CalculatorOverview>();
@@ -97,9 +111,29 @@ export default function App() {
       .filter((g) => g.items.length);
   }, [specs]);
 
+  /** 그룹별 계산 완료 수 — 탭 배지 */
+  const groupDone = useMemo(() => {
+    const m: Record<string, { done: number; total: number }> = {};
+    for (const g of groups) {
+      m[g.name] = { done: g.items.filter((s) => live[s.id]?.result).length, total: g.items.length };
+    }
+    return m;
+  }, [groups, live]);
+
   useEffect(() => {
     document.title = overview ? `${overview.snapshot.patient.id} — 환자 계산기` : "환자 계산기 — SNUH";
   }, [overview]);
+
+  function jumpTo(calcId: string) {
+    const spec = specs?.items.find((s) => s.id === calcId);
+    if (!spec) return;
+    setTab(spec.group);
+    // 탭이 그려진 뒤 카드로 스크롤
+    window.setTimeout(() => document.getElementById(`calc-${calcId}`)?.scrollIntoView({ behavior: "smooth", block: "start" }), 50);
+  }
+
+  const tabCls = (active: boolean) =>
+    `rounded px-3 py-1.5 text-sm whitespace-nowrap ${active ? "bg-indigo-50 font-medium text-indigo-700" : "text-gray-600 hover:bg-gray-100"}`;
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -161,24 +195,49 @@ export default function App() {
             <PatientPanel overview={overview} variables={specs?.variables ?? {}} loading={loading} />
           </aside>
 
-          <section className="space-y-6">
+          <section>
             {!specs && !specsErr && <p className="text-sm text-gray-500">계산기 목록 불러오는 중…</p>}
-            {groups.map((g) => (
-              <div key={g.name}>
-                <h2 className="mb-2 text-xs font-semibold uppercase tracking-wide text-gray-400">{g.name}</h2>
-                <div className="grid items-start gap-4 md:grid-cols-2 2xl:grid-cols-3">
-                  {g.items.map((spec) => (
-                    <CalculatorCard
-                      key={`${spec.id}:${epoch}`}
-                      spec={spec}
-                      overview={byId.get(spec.id)}
-                      flagLabels={overview?.flag_labels ?? specs?.flags ?? {}}
-                    />
-                  ))}
+            {specs && (
+              <>
+                <nav className="mb-4 flex gap-1 overflow-x-auto border-b border-gray-200 pb-2" aria-label="계산기 그룹">
+                  <button type="button" className={tabCls(tab === SUMMARY_TAB)} onClick={() => setTab(SUMMARY_TAB)}>
+                    요약
+                  </button>
+                  {groups.map((g) => {
+                    const d = groupDone[g.name];
+                    return (
+                      <button key={g.name} type="button" className={tabCls(tab === g.name)} onClick={() => setTab(g.name)}>
+                        {g.name}
+                        <span className={`ml-1.5 text-[11px] ${d.done === d.total ? "text-emerald-600" : "text-gray-400"}`}>
+                          {d.done}/{d.total}
+                        </span>
+                      </button>
+                    );
+                  })}
+                </nav>
+
+                <div hidden={tab !== SUMMARY_TAB}>
+                  <SummaryTable specs={specs.items} groups={groups} live={live} hasPatient={!!overview} onJump={jumpTo} />
                 </div>
-              </div>
-            ))}
-            <p className="pt-2 text-xs text-gray-400">
+
+                {groups.map((g) => (
+                  <div key={g.name} hidden={tab !== g.name}>
+                    <div className="space-y-4">
+                      {g.items.map((spec) => (
+                        <CalculatorCard
+                          key={`${spec.id}:${epoch}`}
+                          spec={spec}
+                          overview={byId.get(spec.id)}
+                          flagLabels={overview?.flag_labels ?? specs.flags}
+                          onResult={onResult}
+                        />
+                      ))}
+                    </div>
+                  </div>
+                ))}
+              </>
+            )}
+            <p className="pt-4 text-xs text-gray-400">
               임상 판단 보조용 도구입니다. 자동으로 채워진 값은 가장 최근 기록 1건이며, 출처와 기록 시점을 반드시 확인하세요.
             </p>
           </section>

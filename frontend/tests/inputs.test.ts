@@ -8,6 +8,8 @@ const spec: CalculatorSpec = {
   group: "g",
   description: "",
   references: [],
+  scale: null,
+  guide: null,
   inputs: [
     { key: "cr", label: "Cr", type: "number", unit: "mg/dL", required: true, default: null, variable: "creatinine", flag: null, auto: true, minimum: 0, maximum: 50, help: null },
     { key: "age", label: "나이", type: "number", unit: "세", required: true, default: null, variable: null, flag: null, auto: true, minimum: 0, maximum: 130, help: null },
