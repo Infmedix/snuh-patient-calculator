@@ -45,6 +45,12 @@ export default function App() {
   // 딥링크 `#/p/{환자}/{계산기}` - 환자 로드가 끝난 뒤 그 카드로 이동
   const pendingCalc = useRef<string | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+  // 경과 시간 표시("12분 전")가 화면에서 흘러가도록 30초마다 다시 그린다
+  const [, setTick] = useState(0);
+  useEffect(() => {
+    const id = window.setInterval(() => setTick((t) => t + 1), 30_000);
+    return () => window.clearInterval(id);
+  }, []);
   // PAT (B 방식: 사용자 본인 토큰). mock 모드에서는 필요 없다.
   const [pat, setPatState] = useState<string | null>(() => getPat());
   const [patOpen, setPatOpen] = useState(false);

@@ -10,8 +10,9 @@ from __future__ import annotations
 
 import json
 import logging
+import re
 from dataclasses import dataclass, field
-from datetime import datetime
+from datetime import datetime, timedelta
 from pathlib import Path
 from typing import Any, Optional, Protocol
 
@@ -109,12 +110,34 @@ class MockFhirClient:
     def describe(self) -> str:
         return f"mock {self.dir}"
 
+    _REL = re.compile(r"^now(?:([+-])(\d+)([mhd]))?$")
+    _TIME_KEYS = ("effectiveDateTime", "issued", "recordedDate")
+
+    @classmethod
+    def _resolve_time(cls, value, now: datetime):
+        """fixture 의 상대 시각 표기 → 실제 시각. 'now', 'now-12m', 'now-3h', 'now-2d' (그 외는 그대로)."""
+        if not isinstance(value, str):
+            return value
+        m = cls._REL.match(value.strip())
+        if not m:
+            return value
+        sign, n, unit = m.groups()
+        delta = timedelta(**{{"m": "minutes", "h": "hours", "d": "days"}[unit]: int(n)}) if n else timedelta()
+        t = now - delta if sign == "-" else now + delta
+        return t.replace(microsecond=0).isoformat()
+
     def _load(self, pid: str) -> Optional[list[dict]]:
         p = self.dir / "patients" / f"{pid}.json"
         if not p.is_file() or not pid or "/" in pid or ".." in pid:
             return None
         bundle = json.loads(p.read_text(encoding="utf-8"))
-        return [e["resource"] for e in bundle.get("entry", []) if "resource" in e]
+        now = datetime.now()
+        resources = [e["resource"] for e in bundle.get("entry", []) if "resource" in e]
+        for r in resources:
+            for k in self._TIME_KEYS:
+                if k in r:
+                    r[k] = self._resolve_time(r[k], now)
+        return resources
 
     def patients(self) -> list[str]:
         d = self.dir / "patients"

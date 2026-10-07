@@ -21,12 +21,20 @@ export function fmtDate(iso: string | null | undefined): string {
   return s === "-" ? s : s.slice(0, 10);
 }
 
-/** 기록 시각이 `now` 기준 며칠 전인지 - "오늘" · "3일 전" · "2개월 전". */
+/** 기록 시각이 `now` 기준 얼마나 전인지 - "40초 전" · "12분 전" · "3시간 전" · "3일 전" · "2개월 전". 날짜만 있으면(시각 없음) 일 단위. */
 export function daysAgo(iso: string | null | undefined, now: Date = new Date()): string {
   if (!iso) return "";
   const d = new Date(iso);
   if (Number.isNaN(d.getTime())) return "";
-  const days = Math.floor((now.getTime() - d.getTime()) / 86_400_000);
+  const ms = now.getTime() - d.getTime();
+  const dateOnly = /^\d{4}-\d{2}-\d{2}$/.test(iso);
+  if (!dateOnly && ms < 86_400_000) {
+    const min = Math.floor(ms / 60_000);
+    if (min < 1) return `${Math.max(0, Math.floor(ms / 1000))}초 전`;
+    if (min < 60) return `${min}분 전`;
+    return `${Math.floor(min / 60)}시간 전`;
+  }
+  const days = Math.floor(ms / 86_400_000);
   if (days <= 0) return "오늘";
   if (days < 30) return `${days}일 전`;
   if (days < 365) return `${Math.floor(days / 30)}개월 전`;

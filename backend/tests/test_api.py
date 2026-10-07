@@ -30,6 +30,7 @@ def test_readiness_mock(client):
     r = client.get("/api/health/ready")
     assert r.status_code == 200
     assert r.json()["fhir"] == "mock"
+    assert r.json()["fixtures"] == 3
     assert r.json()["token"] == "none"
 
 
@@ -342,6 +343,17 @@ async def test_mock_client_filters_category_and_date():
     with pytest.raises(FhirError) as ei:
         await m.get("Patient/nope")
     assert ei.value.status == 404
+
+
+async def test_mock_client_resolves_relative_timestamps():
+    from datetime import datetime, timedelta
+    m = MockFhirClient(settings.FIXTURES_DIR)
+    r = await m.get("Observation", {"patient": "30000003", "category": "clinical", "_count": 100})
+    whens = [e["resource"]["effectiveDateTime"] for e in r["entry"]]
+    latest = max(datetime.fromisoformat(w) for w in whens)
+    assert timedelta(minutes=11) < datetime.now() - latest < timedelta(minutes=14)   # now-12m
+    assert MockFhirClient._resolve_time("2026-10-05T08:30:00", datetime.now()) == "2026-10-05T08:30:00"
+    assert MockFhirClient._resolve_time("now-2d", datetime(2026, 10, 7, 9, 0)) == "2026-10-05T09:00:00"
 
 
 async def test_http_client_maps_401_without_leaking_token(monkeypatch):

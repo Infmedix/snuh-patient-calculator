@@ -22,7 +22,11 @@ describe("fmtDateTime / fmtDate", () => {
 describe("daysAgo", () => {
   const now = new Date("2026-10-07T09:00:00");
   it("오늘·일·개월·년 단위로 말한다", () => {
-    expect(daysAgo("2026-10-07T06:00:00", now)).toBe("오늘");
+    expect(daysAgo("2026-10-07T08:59:30", now)).toBe("30초 전");
+    expect(daysAgo("2026-10-07T08:48:00", now)).toBe("12분 전");
+    expect(daysAgo("2026-10-07T06:00:00", now)).toBe("3시간 전");
+    expect(daysAgo("2026-10-06T10:00:00", now)).toBe("23시간 전");
+    expect(daysAgo("2026-10-07", now)).toBe("오늘");
     expect(daysAgo("2026-10-02T06:00:00", now)).toBe("5일 전");
     expect(daysAgo("2026-07-08T06:00:00", now)).toBe("3개월 전");
     expect(daysAgo("2024-05-30", now)).toBe("2년 전");
