@@ -122,26 +122,36 @@ export default function CalculatorCard({
   return (
     <article id={`calc-${spec.id}`} className={`scroll-mt-20 rounded-lg border border-gray-200 border-l-4 bg-white ${bar}`}>
       {/* ---------- 머리 ---------- */}
-      <header className="flex flex-wrap items-start gap-x-4 gap-y-2 px-5 pt-4">
+      <header className="flex items-start gap-4 px-5 pt-4">
         <div className="min-w-0 flex-1">
           <h3 className="text-base font-semibold text-gray-900">{spec.name}</h3>
           <p className="text-sm text-gray-600">{spec.description}</p>
           {spec.guide && <p className="mt-1 max-w-3xl text-xs leading-relaxed text-gray-500">{spec.guide}</p>}
+          <p className="mt-1.5 text-[11px] text-gray-400">
+            입력 {counts.total}개 · 자동 채움 {counts.auto} · 직접 입력 {manualCount}
+            {emptyCount > 0 && <span className="text-amber-700"> · 비어 있음 {emptyCount}</span>}
+          </p>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex shrink-0 flex-col items-end gap-1.5">
+          <button
+            type="button"
+            className={`${btn.secondary} w-[120px] whitespace-nowrap`}
+            onClick={() => setOpen((v) => !v)}
+            aria-expanded={open}
+            aria-controls={`inputs-${spec.id}`}
+          >
+            {open ? "입력값 닫기 ▴" : "입력값 수정 ▾"}
+          </button>
           {dirty.current && (
-            <button type="button" className={btn.secondary} onClick={reset}>
+            <button type="button" className={`${btn.ghost} whitespace-nowrap`} onClick={reset}>
               자동 값으로 되돌리기
             </button>
           )}
-          <button type="button" className={btn.secondary} onClick={() => setOpen((v) => !v)} aria-expanded={open}>
-            {open ? "입력 접기" : `입력 보기 (${counts.total})`}
-          </button>
         </div>
       </header>
 
       {/* ---------- 결과 ---------- */}
-      <section className="px-5 pt-4">
+      <section className={`px-5 pt-4 ${open ? "" : "pb-4"}`}>
         {result ? (
           <div className={`rounded-md border px-4 py-3 ${RESULT_BG[result.severity]}`}>
             <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
@@ -204,21 +214,14 @@ export default function CalculatorCard({
       </section>
 
       {/* ---------- 입력 ---------- */}
-      {open && (
-        <section className="px-5 py-4">
-          <div className="mb-2 flex items-baseline justify-between">
-            <h4 className="text-xs font-semibold uppercase tracking-wide text-gray-500">입력</h4>
-            <p className="text-[11px] text-gray-400">
-              자동 {counts.auto} · 직접 {manualCount} · 비어 있음 {emptyCount} / 총 {counts.total}
-            </p>
-          </div>
-          <div className="grid gap-2 sm:grid-cols-2">
-            {spec.inputs.map((i) => (
-              <Field key={i.key} spec={i} state={form[i.key]} onChange={(v) => change(i.key, v)} missing={missingKeys.includes(i.key)} />
-            ))}
-          </div>
-        </section>
-      )}
+      <section id={`inputs-${spec.id}`} className="px-5 py-4" hidden={!open}>
+        <h4 className="mb-2 text-xs font-semibold uppercase tracking-wide text-gray-500">입력값</h4>
+        <div className="grid gap-2 sm:grid-cols-2">
+          {spec.inputs.map((i) => (
+            <Field key={i.key} spec={i} state={form[i.key]} onChange={(v) => change(i.key, v)} missing={missingKeys.includes(i.key)} />
+          ))}
+        </div>
+      </section>
 
       {/* ---------- 참고 ---------- */}
       {(result?.notes.length || spec.references.length) ? (
