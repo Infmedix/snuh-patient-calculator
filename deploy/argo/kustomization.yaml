@@ -6,4 +6,4 @@ configMapGenerator:
     envs: [config.env]
 images:
   - name: registry.internal/airgap/snuh-patient-calculator
-    newTag: "261007b"                   # 불변 태그 = 빌드 태그(YYMMDD + a,b,c…). 재빌드 시 함께 bump. ":latest" 금지
+    newTag: "261007c"                   # 불변 태그 = 빌드 태그(YYMMDD + a,b,c…). 재빌드 시 함께 bump. ":latest" 금지
