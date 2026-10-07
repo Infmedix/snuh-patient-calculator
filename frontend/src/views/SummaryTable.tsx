@@ -1,7 +1,6 @@
 import { useMemo, useState } from "react";
 import type { CalculatorSpec, Result } from "../api";
 import { copyText, summaryText, type CopyContext } from "../copy";
-import { sortFavoritesFirst } from "../favorites";
 import { fmtNum } from "../format";
 import { SEVERITY_TONE, Tag, btn, input, td, th } from "../ui";
 
@@ -14,7 +13,7 @@ type Group = { name: string; items: CalculatorSpec[] };
 type Row = { spec: CalculatorSpec; group: string };
 
 /**
- * 요약 탭 - 한 표. 별표한 계산기가 맨 위로 올라오고 나머지는 그 아래 (접지 않는다).
+ * 요약 탭 - 그룹별 머리 행으로 나눈 한 표 (접지 않는다). 별표는 표시만 (그룹 탭 안 카드 순서에 쓰임).
  * 위험(danger) 결과가 하나라도 있으면 표 위에 배너로 모아 보여 준다. 검색어가 있으면 이름이 맞는 행만.
  */
 export default function SummaryTable({
@@ -43,7 +42,6 @@ export default function SummaryTable({
   const ordered: Row[] = useMemo(() => groups.flatMap((g) => g.items.map((s) => ({ spec: s, group: g.name }))), [groups]);
   const q = query.trim().toLowerCase();
   const searched = q ? ordered.filter(({ spec }) => `${spec.name} ${spec.description} ${spec.id}`.toLowerCase().includes(q)) : null;
-  const sorted = useMemo(() => sortFavoritesFirst(ordered.map((o) => ({ id: o.spec.id, ...o })), favorites), [ordered, favorites]);
   const dangers = ordered.filter((o) => live[o.spec.id]?.result?.severity === "danger");
 
   async function copyAll() {
@@ -53,7 +51,7 @@ export default function SummaryTable({
     window.setTimeout(() => setCopied(null), 1500);
   }
 
-  function renderRow({ spec, group }: Row) {
+  function renderRow({ spec, group }: Row, grouped = false) {
     const r = live[spec.id];
     const res = r?.result ?? null;
     const missing = r?.missing ?? [];
@@ -76,7 +74,7 @@ export default function SummaryTable({
         </td>
         <td className={td}>
           <div className="font-medium text-gray-900">{spec.name}</div>
-          <div className="text-[11px] text-gray-400">{group}</div>
+          {!grouped && <div className="text-[11px] text-gray-400">{group}</div>}
         </td>
         <td className={`${td} whitespace-nowrap text-right font-mono`}>
           {res ? (
@@ -105,7 +103,8 @@ export default function SummaryTable({
     );
   }
 
-  function renderTable(rows: Row[]) {
+  function renderTable(rows: Row[], byGroup = false) {
+    const sections = byGroup ? groups.map((g) => ({ name: g.name, rows: rows.filter((r) => r.group === g.name) })).filter((s) => s.rows.length) : [{ name: "", rows }];
     return (
       <table className="w-full table-fixed sm:table-auto">
         <thead>
@@ -117,7 +116,18 @@ export default function SummaryTable({
             <th className={`${th} hidden sm:table-cell`}></th>
           </tr>
         </thead>
-        <tbody>{rows.map(renderRow)}</tbody>
+        {sections.map((s) => (
+          <tbody key={s.name || "all"}>
+            {byGroup && (
+              <tr className="border-t border-gray-200 bg-gray-50/70">
+                <td colSpan={5} className="px-3 py-1 text-[11px] font-semibold uppercase tracking-wide text-gray-500">
+                  {s.name}
+                </td>
+              </tr>
+            )}
+            {s.rows.map((r) => renderRow(r, byGroup))}
+          </tbody>
+        ))}
       </table>
     );
   }
@@ -175,12 +185,7 @@ export default function SummaryTable({
           <p className="border-t border-gray-100 px-4 py-3 text-xs text-gray-400">「{query}」에 맞는 계산기가 없습니다.</p>
         )
       ) : (
-        <>
-          {favorites.length === 0 && (
-            <div className="border-t border-gray-100 px-4 pt-2 text-[11px] text-gray-500">별표(☆)를 찍은 계산기는 맨 위로 올라옵니다.</div>
-          )}
-          {renderTable(sorted)}
-        </>
+        renderTable(ordered, true)
       )}
     </section>
   );
