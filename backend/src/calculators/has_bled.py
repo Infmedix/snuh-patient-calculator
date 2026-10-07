@@ -10,7 +10,7 @@ from __future__ import annotations
 
 from typing import Optional
 
-from src.calculators.base import CalculatorSpec, Derived, Detail, InputSpec, Result, register
+from src.calculators.base import Band, CalculatorSpec, Derived, Detail, InputSpec, Result, Scale, register
 from src.snapshot.model import Snapshot
 
 BILI_ULN = 1.2    # mg/dL
@@ -119,5 +119,7 @@ SPEC = register(CalculatorSpec(
     ),
     compute=compute,
     references=("Pisters R et al. Chest 2010;138:1093-100.",),
+    scale=Scale(0, 9, (Band(2, "저위험", "ok"), Band(3, "중간", "warn"), Band(None, "고위험", "danger"))),
+    guide="항응고 치료 중 1년 내 주요 출혈 위험. 3점 이상은 항응고를 피하라는 뜻이 아니라, 교정 가능한 인자(혈압·약물·음주)를 다루고 더 자주 보라는 뜻입니다.",
 ))
 

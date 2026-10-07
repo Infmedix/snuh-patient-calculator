@@ -10,7 +10,7 @@ APS 12항목(입실 후 24시간 최악값) + 나이 점수 + 만성 건강 점�
 
 from __future__ import annotations
 
-from src.calculators.base import INF, CalculatorSpec, Detail, InputError, InputSpec, Option, Result, band, register
+from src.calculators.base import Band, CalculatorSpec, Detail, INF, InputError, InputSpec, Option, Result, Scale, band, register
 from src.calculators.common import age_input, derive_map
 from src.calculators.sofa import normalize_fio2
 
@@ -138,4 +138,6 @@ SPEC = register(CalculatorSpec(
     ),
     compute=compute,
     references=("Knaus WA et al. Crit Care Med 1985;13:818-29.",),
+    scale=Scale(0, 71, (Band(10, "낮음", "ok"), Band(20, "중등도", "warn"), Band(None, "높음", "danger"))),
+    guide="중환자실 입실 첫 24시간의 최악값 12항목 + 나이 + 만성질환으로 사망 위험을 추정합니다. 자동 채움은 최근 1건이므로 최악값인지 확인하세요.",
 ))

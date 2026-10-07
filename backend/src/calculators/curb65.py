@@ -7,7 +7,7 @@ Lim WS et al. Thorax 2003;58:377-82. 30일 사망률: 0 0.6% · 1 2.7% · 2 6.8%
 
 from __future__ import annotations
 
-from src.calculators.base import CalculatorSpec, Detail, InputSpec, Result, register
+from src.calculators.base import Band, CalculatorSpec, Detail, InputSpec, Result, Scale, register
 from src.calculators.common import age_input
 
 MORTALITY = {0: "0.6%", 1: "2.7%", 2: "6.8%", 3: "14%", 4: "27.8%", 5: "27.8%"}
@@ -49,4 +49,6 @@ SPEC = register(CalculatorSpec(
     ),
     compute=compute,
     references=("Lim WS et al. Thorax 2003;58:377-82.",),
+    scale=Scale(0, 5, (Band(2, "저위험", "ok"), Band(3, "중등도", "warn"), Band(None, "중증", "danger"))),
+    guide="지역사회획득 폐렴의 입원 여부·중증도 판단. 0~1점 외래, 2점 단기 입원 고려, 3점 이상 입원(4~5점은 중환자실 평가).",
 ))

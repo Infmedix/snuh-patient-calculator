@@ -7,7 +7,7 @@ INR <1.7 / 1.7–2.3 / >2.3 → 1/2/3, 복수 없음/경도(이뇨제 조절)/�
 
 from __future__ import annotations
 
-from src.calculators.base import CalculatorSpec, Detail, InputSpec, Option, Result, register
+from src.calculators.base import Band, CalculatorSpec, Detail, InputSpec, Option, Result, Scale, register
 
 
 def _pts(value, cuts, ascending=True):
@@ -63,4 +63,6 @@ SPEC = register(CalculatorSpec(
     ),
     compute=compute,
     references=("Pugh RNH et al. Br J Surg 1973;60:646-9.",),
+    scale=Scale(5, 15, (Band(7, "Class A", "ok"), Band(10, "Class B", "warn"), Band(None, "Class C", "danger"))),
+    guide="간경변의 중증도를 검사 3가지와 진찰 소견 2가지로 5~15점으로 매깁니다. 복수·뇌병증은 기록에서 가져올 수 없어 직접 고릅니다.",
 ))

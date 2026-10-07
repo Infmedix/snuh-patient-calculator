@@ -10,7 +10,7 @@ from __future__ import annotations
 
 import math
 
-from src.calculators.base import CalculatorSpec, Detail, InputSpec, Result, register
+from src.calculators.base import Band, CalculatorSpec, Detail, InputSpec, Result, Scale, register
 
 MORTALITY_90D = ((9, "≈1.9%"), (19, "≈6.0%"), (29, "≈19.6%"), (39, "≈52.6%"), (40, "≈71.3%"))
 
@@ -75,4 +75,6 @@ SPEC = register(CalculatorSpec(
     ),
     compute=compute,
     references=("OPTN Policy 9.1 (2016) MELD calculation.", "Kim WR et al. NEJM 2008;359:1018-26."),
+    scale=Scale(6, 40, (Band(10, "낮음", "ok"), Band(20, "중간", "warn"), Band(30, "높음", "danger"), Band(None, "매우 높음", "danger"))),
+    guide="말기 간질환의 3개월 사망 위험. 간이식 대기 순위에 쓰는 UNOS 식이며 나트륨 보정이 포함됩니다.",
 ))

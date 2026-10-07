@@ -70,6 +70,29 @@ class InputSpec:
         return d
 
 
+@dataclass(frozen=True)
+class Band:
+    """구간 막대의 한 칸 — `upto` 미만까지 이 구간 (None = 끝까지)."""
+
+    upto: Optional[float]
+    label: str
+    severity: Severity
+
+
+@dataclass(frozen=True)
+class Scale:
+    """결과 해석용 구간 막대. 프런트가 min~max 사이에 bands 를 그리고 현재 값을 표시한다."""
+
+    min: float
+    max: float
+    bands: tuple[Band, ...]
+    note: Optional[str] = None     # 막대 아래 한 줄 (예: "여성은 >460 ms")
+
+    def to_dict(self) -> dict:
+        return {"min": self.min, "max": self.max, "note": self.note,
+                "bands": [{"upto": b.upto, "label": b.label, "severity": b.severity} for b in self.bands]}
+
+
 @dataclass
 class Detail:
     label: str
@@ -121,6 +144,8 @@ class CalculatorSpec:
     inputs: tuple[InputSpec, ...]
     compute: Callable[[dict], Result]
     references: tuple[str, ...] = ()
+    scale: Optional[Scale] = None
+    guide: Optional[str] = None          # 카드 상단 한두 문장 — 언제 쓰고 어떻게 읽는지
 
     def input(self, key: str) -> InputSpec:
         for i in self.inputs:
@@ -136,6 +161,8 @@ class CalculatorSpec:
             "description": self.description,
             "inputs": [i.to_dict() for i in self.inputs],
             "references": list(self.references),
+            "scale": self.scale.to_dict() if self.scale else None,
+            "guide": self.guide,
         }
 
     # ----- 검증 + 실행 -----

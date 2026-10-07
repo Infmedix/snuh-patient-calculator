@@ -11,7 +11,7 @@
 
 from __future__ import annotations
 
-from src.calculators.base import INF, CalculatorSpec, Detail, InputSpec, Option, Result, band, register
+from src.calculators.base import Band, CalculatorSpec, Detail, INF, InputSpec, Option, Result, Scale, band, register
 from src.calculators.common import derive_map
 
 VASOPRESSOR = (
@@ -132,4 +132,6 @@ SPEC = register(CalculatorSpec(
     ),
     compute=compute,
     references=("Vincent JL et al. Intensive Care Med 1996;22:707-10.", "Singer M et al. JAMA 2016;315:801-10 (Sepsis-3)."),
+    scale=Scale(0, 24, (Band(3, "경증", "ok"), Band(7, "경증~중등도", "warn"), Band(12, "중등도", "warn"), Band(None, "중증", "danger"))),
+    guide="호흡·응고·간·심혈관·중추신경·신장 6개 장기를 각 0~4점으로. 패혈증(Sepsis-3)은 기저치 대비 2점 이상 상승으로 정의합니다.",
 ))

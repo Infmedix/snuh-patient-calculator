@@ -7,7 +7,7 @@ RR(초) = 60 / HR.  Bazett QT/√RR · Fridericia QT/∛RR · Framingham QT + 15
 
 from __future__ import annotations
 
-from src.calculators.base import CalculatorSpec, Detail, InputSpec, Result, register
+from src.calculators.base import Band, CalculatorSpec, Detail, InputSpec, Result, Scale, register
 from src.calculators.common import derive_ecg_or_vital_hr, sex_input
 
 
@@ -61,4 +61,7 @@ SPEC = register(CalculatorSpec(
     ),
     compute=compute,
     references=("Rautaharju PM et al. AHA/ACCF/HRS. Circulation 2009;119:e241-50.",),
+    scale=Scale(300, 600, (Band(340, "단축", "warn"), Band(450, "정상", "ok"), Band(500, "연장", "warn"), Band(None, "고위험", "danger")),
+                note="연장 기준: 남 >450 ms, 여 >460 ms. 500 ms 이상은 torsades de pointes 위험이 뚜렷이 올라갑니다."),
+    guide="심박수가 빠르거나 느리면 QT 가 달라지므로 60회/분 기준으로 보정한 값. 대표값은 Fridericia 식이며 네 가지 식을 모두 보여줍니다.",
 ))

@@ -8,7 +8,7 @@ KDIGO 2012 분류: G1 ≥90, G2 60–89, G3a 45–59, G3b 30–44, G4 15–29, G
 
 from __future__ import annotations
 
-from src.calculators.base import CalculatorSpec, Detail, InputSpec, Result, register
+from src.calculators.base import Band, CalculatorSpec, Detail, InputSpec, Result, Scale, register
 from src.calculators.common import age_input, sex_input
 
 STAGES = (
@@ -56,4 +56,7 @@ SPEC = register(CalculatorSpec(
     ),
     compute=compute,
     references=("Inker LA et al. NEJM 2021;385:1737-49.", "KDIGO 2012 CKD Guideline."),
+    scale=Scale(0, 120, (Band(15, "G5 신부전", "danger"), Band(30, "G4", "danger"), Band(45, "G3b", "warn"),
+                         Band(60, "G3a", "warn"), Band(90, "G2", "ok"), Band(None, "G1", "ok"))),
+    guide="혈청 크레아티닌·나이·성별로 사구체여과율을 추정합니다. 60 미만이 3개월 이상 지속되면 만성콩팥병(CKD G3 이상)입니다.",
 ))

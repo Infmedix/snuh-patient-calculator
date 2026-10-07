@@ -5,7 +5,7 @@
 
 from __future__ import annotations
 
-from src.calculators.base import CalculatorSpec, Detail, InputSpec, Result, register
+from src.calculators.base import Band, CalculatorSpec, Detail, InputSpec, Result, Scale, register
 
 
 def compute(i: dict) -> Result:
@@ -39,4 +39,7 @@ SPEC = register(CalculatorSpec(
     ),
     compute=compute,
     references=("대한비만학회. 비만 진료지침 2022.",),
+    scale=Scale(10, 45, (Band(18.5, "저체중", "warn"), Band(23, "정상", "ok"), Band(25, "비만전단계", "info"),
+                         Band(30, "1단계 비만", "warn"), Band(35, "2단계 비만", "danger"), Band(None, "3단계 비만", "danger"))),
+    guide="체중(kg)을 신장(m)의 제곱으로 나눈 값. 한국인 기준(대한비만학회)은 23 이상을 비만전단계, 25 이상을 비만으로 봅니다.",
 ))

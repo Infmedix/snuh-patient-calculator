@@ -40,6 +40,16 @@ def test_every_spec_serializes_and_inputs_have_unique_keys():
                 assert i["options"], (spec.id, i["key"])
 
 
+def test_every_spec_has_scale_and_guide_and_bands_are_ascending():
+    for spec in calculators.all_specs():
+        assert spec.scale is not None and spec.guide, spec.id
+        uptos = [b.upto for b in spec.scale.bands]
+        assert uptos[-1] is None, spec.id
+        finite = [u for u in uptos if u is not None]
+        assert finite == sorted(finite) and all(spec.scale.min < u <= spec.scale.max for u in finite), spec.id
+        assert spec.to_dict()["scale"]["bands"][0]["label"]
+
+
 def test_missing_required_input_raises_with_keys():
     with pytest.raises(InputError) as ei:
         calc("bmi", weight_kg=70)

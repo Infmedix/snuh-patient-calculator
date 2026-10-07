@@ -7,7 +7,7 @@ V 혈관질환(심근경색·말초동맥질환·대동맥판) 1, A 65–74세 1
 
 from __future__ import annotations
 
-from src.calculators.base import CalculatorSpec, Detail, Result, register
+from src.calculators.base import Band, CalculatorSpec, Detail, Result, Scale, register
 from src.calculators.common import age_input, flag_input, sex_input
 
 ANNUAL_RISK = {0: 0.2, 1: 0.6, 2: 2.2, 3: 3.2, 4: 4.8, 5: 7.2, 6: 9.7, 7: 11.2, 8: 10.8, 9: 12.2}
@@ -59,4 +59,7 @@ SPEC = register(CalculatorSpec(
     ),
     compute=compute,
     references=("Lip GYH et al. Chest 2010;137:263-72.", "Hindricks G et al. ESC 2020 AF Guidelines."),
+    scale=Scale(0, 9, (Band(1, "저위험", "ok"), Band(2, "중간", "warn"), Band(None, "고위험", "danger")),
+                note="여성은 성별 1점을 빼고 읽습니다 (여 1점 = 저위험, 2점 = 중간, 3점 이상 = 고위험)."),
+    guide="비판막성 심방세동 환자의 연간 뇌졸중 위험. 남 2점·여 3점 이상이면 항응고 치료가 권고됩니다.",
 ))

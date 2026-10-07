@@ -7,7 +7,7 @@ CrCl = (140 − 나이) × 체중 / (72 × Scr) × 0.85 [여성]   (Nephron 1976
 
 from __future__ import annotations
 
-from src.calculators.base import CalculatorSpec, Detail, InputError, InputSpec, Option, Result, register
+from src.calculators.base import Band, CalculatorSpec, Detail, InputError, InputSpec, Option, Result, Scale, register
 from src.calculators.common import age_input, sex_input
 
 
@@ -70,4 +70,7 @@ SPEC = register(CalculatorSpec(
     ),
     compute=compute,
     references=("Cockcroft DW, Gault MH. Nephron 1976;16:31-41.", "Devine BJ. Drug Intell Clin Pharm 1974;8:650-5."),
+    scale=Scale(0, 120, (Band(15, "신부전", "danger"), Band(30, "중증 감소", "danger"), Band(60, "중등도 감소", "warn"),
+                         Band(90, "경도 감소", "ok"), Band(None, "정상", "ok"))),
+    guide="약물 용량 조절에 쓰는 신기능 추정치. 대부분의 허가사항이 이 식(Cockcroft-Gault)을 기준으로 용량 구간을 정합니다.",
 ))

@@ -15,7 +15,7 @@ from __future__ import annotations
 from datetime import datetime
 from typing import Optional
 
-from src.calculators.base import CalculatorSpec, Derived, Detail, InputSpec, Option, Result, register
+from src.calculators.base import Band, CalculatorSpec, Derived, Detail, InputSpec, Option, Result, Scale, register
 from src.calculators.common import age_input
 from src.snapshot.model import Snapshot
 
@@ -121,4 +121,6 @@ SPEC = register(CalculatorSpec(
     ),
     compute=compute,
     references=("Kondrup J et al. Clin Nutr 2003;22:321-36.",),
+    scale=Scale(0, 7, (Band(3, "위험 낮음", "ok"), Band(None, "영양 위험", "danger"))),
+    guide="입원 환자 영양 위험 선별(ESPEN). 영양상태 손상과 질병 중증도를 각 0~3점으로 더하고 70세 이상이면 1점을 더해 3점 이상이면 영양 치료 계획을 세웁니다.",
 ))
