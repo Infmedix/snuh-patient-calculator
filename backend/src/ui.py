@@ -13,11 +13,26 @@ from typing import Optional
 from fastapi import FastAPI
 from fastapi.responses import RedirectResponse
 from fastapi.staticfiles import StaticFiles
+from starlette.types import Scope
 
 from src import settings
 
 UI_MOUNT_PATH = "/ui"
 _state = {"dist": None}
+
+
+class UiStaticFiles(StaticFiles):
+    """index.html 은 항상 재검증(no-cache) - 새 배포 뒤 브라우저가 옛 index.html 로 옛 번들을 불러오는 것을 막는다.
+    해시가 붙은 assets/ 는 내용이 바뀌면 이름도 바뀌므로 오래 캐시해도 안전하다."""
+
+    async def get_response(self, path: str, scope: Scope):
+        response = await super().get_response(path, scope)
+        # Starlette 는 os.path.normpath 를 거친 경로를 준다 - Windows 에서는 구분자가 백슬래시
+        if path.replace("\\", "/").startswith("assets/"):
+            response.headers["Cache-Control"] = "public, max-age=31536000, immutable"
+        else:
+            response.headers["Cache-Control"] = "no-cache"
+        return response
 
 
 def install_ui(app: FastAPI, dist_dir: Optional[str] = None) -> bool:
@@ -29,7 +44,7 @@ def install_ui(app: FastAPI, dist_dir: Optional[str] = None) -> bool:
     if not dist.is_dir() or not (dist / "index.html").is_file():
         _state["dist"] = None
         return False
-    app.mount(UI_MOUNT_PATH, StaticFiles(directory=str(dist), html=True), name="ui")
+    app.mount(UI_MOUNT_PATH, UiStaticFiles(directory=str(dist), html=True), name="ui")
     _state["dist"] = str(dist)
     return True
 

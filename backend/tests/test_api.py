@@ -290,9 +290,15 @@ def test_ui_with_dist_serves_index(tmp_path):
     d = tmp_path / "dist"
     d.mkdir()
     (d / "index.html").write_text("<!doctype html><title>x</title>")
+    (d / "assets").mkdir()
+    (d / "assets" / "index-abc.js").write_text("1")
     app = FastAPI()
     assert ui.install_ui(app, str(d)) is True
-    assert "<title>x</title>" in TestClient(app).get("/ui/").text
+    c = TestClient(app)
+    r = c.get("/ui/")
+    assert "<title>x</title>" in r.text
+    assert r.headers["cache-control"] == "no-cache"                      # index.html 은 항상 재검증
+    assert "immutable" in c.get("/ui/assets/index-abc.js").headers["cache-control"]
 
 
 # ===== fhir client =====
