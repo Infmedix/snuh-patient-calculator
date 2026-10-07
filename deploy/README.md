@@ -19,14 +19,14 @@
 
 ```bash
 # 1) 이미지 — 태그 = 당일 YYMMDD + v1, v2…  (deploy/build-and-save.sh 가 빌드·save 를 한다)
-TAG=261007v4
+TAG=261007v1
 sh deploy/build-and-save.sh $TAG            # → dist/snuh-patient-calculator-$TAG.tar
 #    → 업로더 ① (http://<호스트>/upload): project=snuh-patient-calculator, tag=$TAG
-#      → registry.internal/airgap/snuh-patient-calculator:$TAG
-#    태그 bump 시 deploy/argo/kustomization.yaml 의 newTag 도 함께 갱신 (":latest" 금지)
+#      → registry.internal/airgap/snuh-patient-calculator:$TAG   (":latest" 금지)
 
-# 2) 매니페스트 — deploy/argo/ 의 4개 파일만 zip (zip 루트에 파일이 바로 오게)
-cd deploy/argo && zip ../../dist/snuh-patient-calculator-deploy.zip kustomization.yaml config.env deployment.yaml service.yaml
+# 2) 매니페스트 — deploy/argo/ 의 4개 파일을 zip (zip 루트에 파일이 바로 오게). kustomization.yaml 의 newTag 는
+#    저장소에 "__TAG__" 로 두고 zip 에 넣을 때 $TAG 로 치환한다 — 배포마다 태그 커밋을 만들지 않기 위해
+sh deploy/upload-testbed.sh $TAG            # ①② 를 한 번에 (치환 포함). 수동이면 sed "s/__TAG__/$TAG/" 후 zip
 #    → 업로더 ②: app=snuh-patient-calculator, ns=platform (Argo CD auto-sync 는 처음엔 끄고 확인 후 Sync)
 #      → GitLab airgap/snuh-patient-calculator (path deploy) + Argo Application
 

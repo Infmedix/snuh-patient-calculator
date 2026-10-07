@@ -1,15 +1,14 @@
 #!/usr/bin/env sh
 # 반출측: 운영 이미지 빌드 + tar 저장. 태그 규칙 = 당일 YYMMDD + v1, v2… (":latest" 금지)
 #
-#   sh deploy/build-and-save.sh 261007v4        # → dist/snuh-patient-calculator-261007v4.tar
+#   sh deploy/build-and-save.sh 261007v1        # → dist/snuh-patient-calculator-261007v1.tar
 #
-# 다음 단계: 업로더 ① (/upload) 에 tar 드롭 (project=snuh-patient-calculator, tag=261007v4)
-#            → registry.internal/airgap/snuh-patient-calculator:261007v4
-#            deploy/argo/kustomization.yaml 의 newTag 를 같은 값으로.
+# 다음 단계: sh deploy/upload-testbed.sh 261007v1  (① 레지스트리 적재 + ② 매니페스트 zip - newTag 를 같은 태그로 치환해 올린다)
+#            수동으로 올릴 때는 kustomization.yaml 의 __TAG__ 를 그 태그로 바꿔 zip 한다.
 # 프런트 빌드 스테이지가 node:24-alpine 을 당기므로 빌드 머신은 인터넷(또는 미러)이 필요하다.
 set -eu
 
-TAG="${1:?태그를 지정하세요 (예: 261007v4)}"
+TAG="${1:?태그를 지정하세요 (예: 261007v1)}"
 IMAGE="snuh-patient-calculator:${TAG}"
 cd "$(dirname "$0")/.."
 mkdir -p dist

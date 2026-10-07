@@ -1,9 +1,9 @@
 #!/usr/bin/env sh
 # 테스트 서버 업로더(/upload) REST 로 ① 이미지 적재 ② 매니페스트 등록.
 #
-#   sh deploy/upload-testbed.sh 261007v4 [http://192.168.0.50] [auto=0|1]
+#   sh deploy/upload-testbed.sh 261007v1 [http://192.168.0.50] [auto=0|1]
 #
-# 전제: dist/snuh-patient-calculator-<TAG>.tar (build-and-save.sh) 가 있고, deploy/argo/kustomization.yaml newTag == TAG.
+# 전제: dist/snuh-patient-calculator-<TAG>.tar (build-and-save.sh). kustomization.yaml 의 newTag(__TAG__)는 zip 에 넣을 때 TAG 로 치환한다.
 # ② 는 GitLab airgap/snuh-patient-calculator 저장소와 Argo Application 을 만든다/갱신한다. auto=1 이면 Argo auto-sync.
 set -eu
 
@@ -14,7 +14,6 @@ APP="snuh-patient-calculator"
 cd "$(dirname "$0")/.."
 TAR="dist/${APP}-${TAG}.tar"
 [ -f "${TAR}" ] || { echo "없음: ${TAR} — 먼저 deploy/build-and-save.sh ${TAG}"; exit 1; }
-grep -q "newTag: \"${TAG}\"" deploy/argo/kustomization.yaml || { echo "kustomization.yaml newTag 가 ${TAG} 가 아닙니다"; exit 1; }
 
 SIZE=$(wc -c < "${TAR}" | tr -d ' ')
 echo "[①] 세션 생성 (project=${APP} tag=${TAG} size=${SIZE})"
@@ -32,7 +31,9 @@ echo
 ZIP="dist/${APP}-deploy.zip"
 rm -f "${ZIP}"
 # config.env 에 secrets.env(git 제외) 의 KEY=VALUE 를 덮어써서 zip 에 넣는다 — 토큰을 저장소에 커밋하지 않기 위해
-STAGE="$(mktemp -d)"; cp deploy/argo/kustomization.yaml deploy/argo/deployment.yaml deploy/argo/service.yaml "${STAGE}/"
+STAGE="$(mktemp -d)"; cp deploy/argo/deployment.yaml deploy/argo/service.yaml "${STAGE}/"
+# kustomization.yaml 의 __TAG__ 를 이번 빌드 태그로 치환 (저장소에는 태그를 커밋하지 않는다)
+sed "s/__TAG__/${TAG}/" deploy/argo/kustomization.yaml > "${STAGE}/kustomization.yaml"
 if [ -f deploy/argo/secrets.env ]; then
   awk 'FNR==NR { if ($0 !~ /^#/ && index($0,"=")) { k=substr($0,1,index($0,"=")-1); v[k]=$0 } ; next }
        { k=substr($0,1,index($0,"=")-1); if (index($0,"=") && (k in v)) print v[k]; else print }' deploy/argo/secrets.env deploy/argo/config.env > "${STAGE}/config.env"

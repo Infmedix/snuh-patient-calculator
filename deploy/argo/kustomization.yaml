@@ -6,4 +6,4 @@ configMapGenerator:
     envs: [config.env]
 images:
   - name: registry.internal/airgap/snuh-patient-calculator
-    newTag: "261007v4"                  # 불변 태그 = 빌드 태그(YYMMDD + v1, v2…). 재빌드 시 함께 bump. ":latest" 금지
+    newTag: "__TAG__"                   # zip 생성 시 deploy/upload-testbed.sh 가 빌드 태그(YYMMDD + v1, v2…)로 치환. 저장소에는 태그를 커밋하지 않는다
