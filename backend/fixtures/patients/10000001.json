@@ -1,0 +1,357 @@
+{
+  "resourceType": "Bundle",
+  "type": "collection",
+  "entry": [
+    {
+      "resource": {
+        "resourceType": "Patient",
+        "id": "10000001",
+        "identifier": [{"system": "https://snuh.org/id/emr-patient-number", "value": "10000001"}],
+        "name": [{"text": "홍길동"}],
+        "gender": "M",
+        "birthDate": "1958-03-15"
+      }
+    },
+    {
+      "resource": {
+        "resourceType": "Observation",
+        "id": "SPCM20261005001",
+        "identifier": [{"value": "SPCM20261005001"}],
+        "status": "final",
+        "category": [{"coding": [{"system": "http://terminology.hl7.org/CodeSystem/observation-category", "code": "laboratory"}]}],
+        "code": {"coding": [{"code": "CC100", "display": "일반화학검사"}], "text": "일반화학검사"},
+        "subject": {"identifier": {"value": "10000001"}},
+        "effectiveDateTime": "2026-10-05T08:30:00",
+        "issued": "2026-10-05T10:10:00",
+        "component": [
+          {"code": {"coding": [{"code": "L1001", "display": "Creatinine"}]}, "valueQuantity": {"value": "1.8", "unit": "mg/dL"}},
+          {"code": {"coding": [{"code": "L1002", "display": "BUN"}]}, "valueQuantity": {"value": "32", "unit": "mg/dL"}},
+          {"code": {"coding": [{"code": "L1003", "display": "Sodium (Na)"}]}, "valueQuantity": {"value": "131", "unit": "mmol/L"}},
+          {"code": {"coding": [{"code": "L1004", "display": "Potassium (K)"}]}, "valueQuantity": {"value": "4.9", "unit": "mmol/L"}},
+          {"code": {"coding": [{"code": "L1005", "display": "Total bilirubin"}]}, "valueQuantity": {"value": "2.6", "unit": "mg/dL"}},
+          {"code": {"coding": [{"code": "L1006", "display": "Direct bilirubin"}]}, "valueQuantity": {"value": "1.1", "unit": "mg/dL"}},
+          {"code": {"coding": [{"code": "L1007", "display": "Albumin"}]}, "valueQuantity": {"value": "2.9", "unit": "g/dL"}},
+          {"code": {"coding": [{"code": "L1008", "display": "AST (SGOT)"}]}, "valueQuantity": {"value": "85", "unit": "U/L"}},
+          {"code": {"coding": [{"code": "L1009", "display": "ALT (SGPT)"}]}, "valueQuantity": {"value": "60", "unit": "U/L"}},
+          {"code": {"coding": [{"code": "L1010", "display": "Alkaline phosphatase"}]}, "valueQuantity": {"value": "180", "unit": "U/L"}},
+          {"code": {"coding": [{"code": "L1011", "display": "Glucose (fasting)"}]}, "valueQuantity": {"value": "142", "unit": "mg/dL"}}
+        ]
+      }
+    },
+    {
+      "resource": {
+        "resourceType": "Observation",
+        "id": "SPCM20261005002",
+        "identifier": [{"value": "SPCM20261005002"}],
+        "status": "final",
+        "category": [{"coding": [{"code": "laboratory"}]}],
+        "code": {"coding": [{"code": "CB100", "display": "일반혈액검사"}], "text": "일반혈액검사"},
+        "subject": {"identifier": {"value": "10000001"}},
+        "effectiveDateTime": "2026-10-05T08:30:00",
+        "component": [
+          {"code": {"coding": [{"code": "L2001", "display": "WBC"}]}, "valueQuantity": {"value": "12.5", "unit": "10^3/uL"}},
+          {"code": {"coding": [{"code": "L2002", "display": "Hemoglobin"}]}, "valueQuantity": {"value": "10.8", "unit": "g/dL"}},
+          {"code": {"coding": [{"code": "L2003", "display": "Hematocrit"}]}, "valueQuantity": {"value": "33.2", "unit": "%"}},
+          {"code": {"coding": [{"code": "L2004", "display": "Platelet count"}]}, "valueQuantity": {"value": "95000", "unit": "/uL"}},
+          {"code": {"coding": [{"code": "L2005", "display": "MPV"}]}, "valueQuantity": {"value": "10.1", "unit": "fL"}}
+        ]
+      }
+    },
+    {
+      "resource": {
+        "resourceType": "Observation",
+        "id": "SPCM20261005003",
+        "identifier": [{"value": "SPCM20261005003"}],
+        "status": "final",
+        "category": [{"coding": [{"code": "laboratory"}]}],
+        "code": {"coding": [{"code": "CG100", "display": "혈액응고검사"}], "text": "혈액응고검사"},
+        "subject": {"identifier": {"value": "10000001"}},
+        "effectiveDateTime": "2026-10-05T08:30:00",
+        "valueQuantity": {"value": "1.9", "unit": ""},
+        "component": [
+          {"code": {"coding": [{"code": "L3001", "display": "PT (INR)"}]}, "valueQuantity": {"value": "1.9", "unit": ""}},
+          {"code": {"coding": [{"code": "L3002", "display": "PT (sec)"}]}, "valueQuantity": {"value": "21.4", "unit": "sec"}}
+        ]
+      }
+    },
+    {
+      "resource": {
+        "resourceType": "Observation",
+        "id": "SPCM20261004001",
+        "identifier": [{"value": "SPCM20261004001"}],
+        "status": "final",
+        "category": [{"coding": [{"code": "laboratory"}]}],
+        "code": {"coding": [{"code": "CA100", "display": "동맥혈가스검사"}], "text": "동맥혈가스검사"},
+        "subject": {"identifier": {"value": "10000001"}},
+        "effectiveDateTime": "2026-10-04T22:10:00",
+        "component": [
+          {"code": {"coding": [{"code": "L4001", "display": "pH"}]}, "valueQuantity": {"value": "7.31", "unit": ""}},
+          {"code": {"coding": [{"code": "L4002", "display": "pCO2"}]}, "valueQuantity": {"value": "48", "unit": "mmHg"}},
+          {"code": {"coding": [{"code": "L4003", "display": "pO2"}]}, "valueQuantity": {"value": "68", "unit": "mmHg"}},
+          {"code": {"coding": [{"code": "L4004", "display": "HCO3-"}]}, "valueQuantity": {"value": "22", "unit": "mmol/L"}}
+        ]
+      }
+    },
+    {
+      "resource": {
+        "resourceType": "Observation",
+        "id": "SPCM20261006009",
+        "identifier": [{"value": "SPCM20261006009"}],
+        "status": "final",
+        "category": [{"coding": [{"code": "laboratory"}]}],
+        "code": {"coding": [{"code": "CU100", "display": "요화학검사"}], "text": "요화학검사"},
+        "subject": {"identifier": {"value": "10000001"}},
+        "effectiveDateTime": "2026-10-06T07:00:00",
+        "valueQuantity": {"value": "85", "unit": "mg/dL"},
+        "component": [
+          {"code": {"coding": [{"code": "L5001", "display": "Creatinine (urine)"}]}, "valueQuantity": {"value": "85", "unit": "mg/dL"}},
+          {"code": {"coding": [{"code": "L5002", "display": "Urine Sodium"}]}, "valueQuantity": {"value": "40", "unit": "mmol/L"}}
+        ]
+      }
+    },
+    {
+      "resource": {
+        "resourceType": "Observation",
+        "id": "SPCM20260901001",
+        "identifier": [{"value": "SPCM20260901001"}],
+        "status": "final",
+        "category": [{"coding": [{"code": "laboratory"}]}],
+        "code": {"coding": [{"code": "CC100", "display": "일반화학검사"}], "text": "일반화학검사"},
+        "subject": {"identifier": {"value": "10000001"}},
+        "effectiveDateTime": "2026-09-01T09:00:00",
+        "component": [
+          {"code": {"coding": [{"code": "L1001", "display": "Creatinine"}]}, "valueQuantity": {"value": "1.2", "unit": "mg/dL"}},
+          {"code": {"coding": [{"code": "L1003", "display": "Sodium (Na)"}]}, "valueQuantity": {"value": "138", "unit": "mmol/L"}}
+        ]
+      }
+    },
+    {
+      "resource": {
+        "resourceType": "Observation",
+        "id": "CLCO1",
+        "identifier": [{"value": "CLCO1", "system": "https://fhir.snuh.org/id/clinical-observation"}],
+        "status": "final",
+        "category": [{"coding": [{"code": "clinical"}]}],
+        "code": {"coding": [{"code": "NI001", "display": "활력징후"}], "text": "활력징후"},
+        "subject": {"display": "10000001"},
+        "effectiveDateTime": "2026-10-06T06:00:00",
+        "valueCodeableConcept": {"coding": [{"code": "NV001", "display": "수축기혈압"}], "text": "112"}
+      }
+    },
+    {
+      "resource": {
+        "resourceType": "Observation",
+        "id": "CLCO2",
+        "status": "final",
+        "category": [{"coding": [{"code": "clinical"}]}],
+        "code": {"coding": [{"code": "NI001", "display": "활력징후"}], "text": "활력징후"},
+        "subject": {"display": "10000001"},
+        "effectiveDateTime": "2026-10-06T06:00:00",
+        "valueCodeableConcept": {"coding": [{"code": "NV002", "display": "이완기혈압"}], "text": "68"}
+      }
+    },
+    {
+      "resource": {
+        "resourceType": "Observation",
+        "id": "CLCO3",
+        "status": "final",
+        "category": [{"coding": [{"code": "clinical"}]}],
+        "code": {"coding": [{"code": "NI001", "display": "활력징후"}], "text": "활력징후"},
+        "subject": {"display": "10000001"},
+        "effectiveDateTime": "2026-10-06T14:00:00",
+        "valueCodeableConcept": {"coding": [{"code": "NV010", "display": "혈압"}], "text": "118/72"}
+      }
+    },
+    {
+      "resource": {
+        "resourceType": "Observation",
+        "id": "CLCO4",
+        "status": "final",
+        "category": [{"coding": [{"code": "clinical"}]}],
+        "code": {"coding": [{"code": "NI001", "display": "활력징후"}], "text": "활력징후"},
+        "subject": {"display": "10000001"},
+        "effectiveDateTime": "2026-10-06T14:00:00",
+        "valueCodeableConcept": {"coding": [{"code": "NV003", "display": "맥박"}], "text": "96회/분"}
+      }
+    },
+    {
+      "resource": {
+        "resourceType": "Observation",
+        "id": "CLCO5",
+        "status": "final",
+        "category": [{"coding": [{"code": "clinical"}]}],
+        "code": {"coding": [{"code": "NI001", "display": "활력징후"}], "text": "활력징후"},
+        "subject": {"display": "10000001"},
+        "effectiveDateTime": "2026-10-06T14:00:00",
+        "valueCodeableConcept": {"coding": [{"code": "NV004", "display": "호흡수"}], "text": "22"}
+      }
+    },
+    {
+      "resource": {
+        "resourceType": "Observation",
+        "id": "CLCO6",
+        "status": "final",
+        "category": [{"coding": [{"code": "clinical"}]}],
+        "code": {"coding": [{"code": "NI001", "display": "활력징후"}], "text": "활력징후"},
+        "subject": {"display": "10000001"},
+        "effectiveDateTime": "2026-10-06T14:00:00",
+        "valueCodeableConcept": {"coding": [{"code": "NV005", "display": "체온"}], "text": "38.2"}
+      }
+    },
+    {
+      "resource": {
+        "resourceType": "Observation",
+        "id": "CLCO7",
+        "status": "final",
+        "category": [{"coding": [{"code": "clinical"}]}],
+        "code": {"coding": [{"code": "NI001", "display": "활력징후"}], "text": "활력징후"},
+        "subject": {"display": "10000001"},
+        "effectiveDateTime": "2026-10-06T14:00:00",
+        "valueCodeableConcept": {"coding": [{"code": "NV006", "display": "SpO2"}], "text": "94 %"}
+      }
+    },
+    {
+      "resource": {
+        "resourceType": "Observation",
+        "id": "CLCO8",
+        "status": "final",
+        "category": [{"coding": [{"code": "clinical"}]}],
+        "code": {"coding": [{"code": "NI002", "display": "신체계측"}], "text": "신체계측"},
+        "subject": {"display": "10000001"},
+        "effectiveDateTime": "2026-10-06T06:00:00",
+        "valueCodeableConcept": {"coding": [{"code": "NV020", "display": "체중"}], "text": "62.5"}
+      }
+    },
+    {
+      "resource": {
+        "resourceType": "Observation",
+        "id": "CLCO9",
+        "status": "final",
+        "category": [{"coding": [{"code": "clinical"}]}],
+        "code": {"coding": [{"code": "NI002", "display": "신체계측"}], "text": "신체계측"},
+        "subject": {"display": "10000001"},
+        "effectiveDateTime": "2026-07-08T06:00:00",
+        "valueCodeableConcept": {"coding": [{"code": "NV020", "display": "체중"}], "text": "66.0"}
+      }
+    },
+    {
+      "resource": {
+        "resourceType": "Observation",
+        "id": "CLCO10",
+        "status": "final",
+        "category": [{"coding": [{"code": "clinical"}]}],
+        "code": {"coding": [{"code": "NI002", "display": "신체계측"}], "text": "신체계측"},
+        "subject": {"display": "10000001"},
+        "effectiveDateTime": "2026-10-06T06:00:00",
+        "valueCodeableConcept": {"coding": [{"code": "NV021", "display": "신장"}], "text": "170"}
+      }
+    },
+    {
+      "resource": {
+        "resourceType": "Observation",
+        "id": "CLCO11",
+        "status": "final",
+        "category": [{"coding": [{"code": "clinical"}]}],
+        "code": {"coding": [{"code": "NI003", "display": "의식상태"}], "text": "의식상태"},
+        "subject": {"display": "10000001"},
+        "effectiveDateTime": "2026-10-06T14:00:00",
+        "valueCodeableConcept": {"coding": [{"code": "NV030", "display": "GCS"}], "text": "14"}
+      }
+    },
+    {
+      "resource": {
+        "resourceType": "Observation",
+        "id": "CLCO12",
+        "status": "final",
+        "category": [{"coding": [{"code": "clinical"}]}],
+        "code": {"coding": [{"code": "NI004", "display": "섭취배설량"}], "text": "섭취배설량"},
+        "subject": {"display": "10000001"},
+        "effectiveDateTime": "2026-10-06T06:00:00",
+        "valueCodeableConcept": {"coding": [{"code": "NV040", "display": "24시간 소변량"}], "text": "900"}
+      }
+    },
+    {
+      "resource": {
+        "resourceType": "Observation",
+        "id": "ORD20261002001",
+        "identifier": [{"value": "ORD20261002001", "system": "https://fhir.snuh.org/id/exam-observation"}],
+        "status": "final",
+        "category": [{"coding": [{"code": "exam"}]}],
+        "code": {"coding": [{"code": "E7011", "display": "심전도검사(12 lead)"}], "text": "심전도검사(12 lead)"},
+        "subject": {"identifier": {"value": "10000001"}},
+        "effectiveDateTime": "2026-10-02T10:30:00",
+        "component": [
+          {"code": {"coding": [{"code": "CPEM001", "display": "심박수"}]}, "valueString": "96회/분"},
+          {"code": {"coding": [{"code": "CPEM002", "display": "QT"}]}, "valueString": "398 ms"},
+          {"code": {"coding": [{"code": "CPEM003", "display": "QTc"}]}, "valueString": "503 ms"},
+          {"code": {"coding": [{"code": "CPEM004", "display": "소견"}]}, "valueString": "Atrial fibrillation with rapid ventricular response"}
+        ]
+      }
+    },
+    {
+      "resource": {
+        "resourceType": "Condition",
+        "id": "DX1",
+        "clinicalStatus": {"coding": [{"code": "active"}]},
+        "verificationStatus": {"coding": [{"code": "confirmed"}]},
+        "code": {"coding": [{"system": "http://www.hl7korea.or.kr/CodeSystem/kostat-kcd-8", "code": "I109", "display": "본태성(원발성) 고혈압"}], "text": "Hypertension"},
+        "subject": {"identifier": {"value": "10000001"}},
+        "recordedDate": "2026-09-20"
+      }
+    },
+    {
+      "resource": {
+        "resourceType": "Condition",
+        "id": "DX2",
+        "code": {"coding": [{"code": "E119", "display": "합병증을 동반하지 않은 2형 당뇨병"}], "text": "Type 2 DM"},
+        "subject": {"identifier": {"value": "10000001"}},
+        "recordedDate": "2026-09-20"
+      }
+    },
+    {
+      "resource": {
+        "resourceType": "Condition",
+        "id": "DX3",
+        "code": {"coding": [{"code": "I480", "display": "발작성 심방세동"}], "text": "Paroxysmal AF"},
+        "subject": {"identifier": {"value": "10000001"}},
+        "recordedDate": "2026-10-01"
+      }
+    },
+    {
+      "resource": {
+        "resourceType": "Condition",
+        "id": "DX4",
+        "code": {"coding": [{"code": "K746", "display": "기타 및 상세불명의 간경변증"}], "text": "Liver cirrhosis"},
+        "subject": {"identifier": {"value": "10000001"}},
+        "recordedDate": "2025-11-02"
+      }
+    },
+    {
+      "resource": {
+        "resourceType": "Condition",
+        "id": "DX5",
+        "code": {"coding": [{"code": "N189", "display": "상세불명의 만성 신장병"}], "text": "CKD"},
+        "subject": {"identifier": {"value": "10000001"}},
+        "recordedDate": "2026-03-14"
+      }
+    },
+    {
+      "resource": {
+        "resourceType": "Condition",
+        "id": "DX6",
+        "code": {"coding": [{"code": "I639", "display": "상세불명의 뇌경색증"}], "text": "Cerebral infarction"},
+        "subject": {"identifier": {"value": "10000001"}},
+        "recordedDate": "2024-05-30"
+      }
+    },
+    {
+      "resource": {
+        "resourceType": "Condition",
+        "id": "DX7",
+        "code": {"coding": [{"code": "I109", "display": "본태성(원발성) 고혈압"}], "text": "Hypertension"},
+        "subject": {"identifier": {"value": "10000001"}},
+        "recordedDate": "2026-06-11"
+      }
+    }
+  ]
+}
