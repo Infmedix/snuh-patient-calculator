@@ -1,16 +1,20 @@
 import { useCallback, useEffect, useMemo, useRef, useState, type FormEvent } from "react";
 import {
+  ApiError,
   errorMessage,
   fetchCalculators,
   fetchOverview,
   fetchReadiness,
+  fhirTokenPageUrl,
   type CalculatorOverview,
   type CalculatorsResponse,
   type Overview,
   type Result,
 } from "./api";
+import { clearPat, getPat, maskPat, setPat } from "./pat";
 import { ErrorBox, Tag, btn, input } from "./ui";
 import CalculatorCard from "./views/CalculatorCard";
+import PatPanel from "./views/PatPanel";
 import PatientPanel from "./views/PatientPanel";
 import SummaryTable, { type LiveResult } from "./views/SummaryTable";
 
@@ -22,6 +26,8 @@ export default function App() {
   const [specs, setSpecs] = useState<CalculatorsResponse | null>(null);
   const [specsErr, setSpecsErr] = useState("");
   const [fhirMode, setFhirMode] = useState<string>("");
+  // 서버에 서비스 계정 PAT 가 있으면(관리자가 발급한 토큰 하나를 공유) 사용자는 PAT 를 등록하지 않아도 된다.
+  const [serviceToken, setServiceToken] = useState(false);
 
   const [draft, setDraft] = useState("");
   const [overview, setOverview] = useState<Overview | null>(null);
@@ -35,6 +41,13 @@ export default function App() {
   // 요약 표 → 카드 이동 요청 (카드 id 별 증가 카운터 — 같은 카드를 다시 눌러도 열리게)
   const [focus, setFocus] = useState<Record<string, number>>({});
   const inputRef = useRef<HTMLInputElement>(null);
+  // PAT (B 방식: 사용자 본인 토큰). mock 모드에서는 필요 없다.
+  const [pat, setPatState] = useState<string | null>(() => getPat());
+  const [patOpen, setPatOpen] = useState(false);
+  const [patNotice, setPatNotice] = useState("");
+  // PAT 패널은 서버에 서비스 토큰이 없는 http 배포에서만 의미가 있다
+  const patRelevant = fhirMode !== "mock" && !serviceToken;
+  const needsPat = patRelevant && !pat;
 
   const loadSpecs = useCallback(() => {
     setSpecsErr("");
@@ -42,7 +55,10 @@ export default function App() {
       .then(setSpecs)
       .catch((e) => setSpecsErr(errorMessage(e)));
     fetchReadiness()
-      .then((r) => setFhirMode(r.fhir ?? ""))
+      .then((r) => {
+        setFhirMode(r.fhir ?? "");
+        setServiceToken(r.token === "service");
+      })
       .catch(() => setFhirMode(""));
   }, []);
   useEffect(loadSpecs, [loadSpecs]);
@@ -53,7 +69,8 @@ export default function App() {
     setLoading(true);
     setLoadErr("");
     try {
-      const ov = await fetchOverview(id);
+      const ov = await fetchOverview(id, getPat());
+      setPatNotice("");
       setOverview(ov);
       setLive({});
       setFocus({});
@@ -61,7 +78,17 @@ export default function App() {
       setTab(SUMMARY_TAB);
       window.location.hash = `#/p/${encodeURIComponent(id)}`;
     } catch (e) {
-      setLoadErr(errorMessage(e));
+      if (e instanceof ApiError && e.code?.startsWith("pat_")) {
+        // 토큰 문제는 일반 오류 상자 대신 PAT 패널에서 안내한다
+        setPatNotice(e.detail);
+        setPatOpen(true);
+        if (e.code === "pat_invalid") {
+          clearPat();
+          setPatState(null);
+        }
+      } else {
+        setLoadErr(errorMessage(e));
+      }
     } finally {
       setLoading(false);
     }
@@ -79,7 +106,24 @@ export default function App() {
 
   function submit(e: FormEvent) {
     e.preventDefault();
+    if (needsPat) {
+      setPatNotice("환자를 조회하려면 먼저 PAT 를 등록하세요.");
+      setPatOpen(true);
+      return;
+    }
     void loadPatient(draft);
+  }
+
+  function registerPat(token: string) {
+    setPat(token);
+    setPatState(getPat());
+    setPatNotice("");
+  }
+
+  function releasePat() {
+    clearPat();
+    setPatState(null);
+    setPatNotice("");
   }
 
   function clearPatient() {
@@ -169,6 +213,23 @@ export default function App() {
             )}
           </form>
           <div className="ml-auto flex items-center gap-2 text-xs text-gray-500">
+            {patRelevant && (
+              <button
+                type="button"
+                className={`${btn.secondary} flex items-center gap-1.5`}
+                onClick={() => setPatOpen((v) => !v)}
+                aria-expanded={patOpen}
+                title={pat ? maskPat(pat) : "FHIR 개인 액세스 토큰 등록"}
+              >
+                PAT
+                {pat ? <Tag tone="green">등록됨</Tag> : <Tag tone="amber">미등록</Tag>}
+              </button>
+            )}
+            {serviceToken && fhirMode === "ok" && (
+              <Tag tone="green" title="서버에 설정된 서비스 계정 PAT 로 FHIR 를 호출합니다">
+                FHIR 연결됨
+              </Tag>
+            )}
             {fhirMode === "mock" && (
               <Tag tone="amber" title="APP_FHIR_MODE=mock — fixture 데이터">
                 mock 데이터
@@ -180,6 +241,11 @@ export default function App() {
       </header>
 
       <main className="mx-auto max-w-7xl px-4 py-5">
+        {(patOpen || (needsPat && !overview)) && patRelevant && (
+          <div className="mb-4">
+            <PatPanel pat={pat} onRegister={registerPat} onRelease={releasePat} fhirUiUrl={fhirTokenPageUrl()} notice={patNotice} />
+          </div>
+        )}
         {specsErr && (
           <div className="mb-4">
             <ErrorBox message={`계산기 목록을 불러올 수 없습니다 — ${specsErr}`} />

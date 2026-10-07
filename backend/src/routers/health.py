@@ -23,15 +23,17 @@ async def liveness() -> dict:
 async def readiness(response: Response) -> dict:
     """snuh-fhir `/health` 왕복 (mock 모드는 fixture 디렉터리만 확인). 실패 503."""
     try:
+        token = "service" if settings.FHIR_TOKEN else "none"
         if settings.FHIR_MODE == "mock":
             n = len(make_client().patients())  # type: ignore[attr-defined]
-            return {"status": "ok", "fhir": "mock", "fixtures": n}
+            return {"status": "ok", "fhir": "mock", "fixtures": n, "token": "none"}
         await make_client().get("health")
-        return {"status": "ok", "fhir": "ok"}
+        return {"status": "ok", "fhir": "ok", "token": token}
     except FhirError as e:
         logger.warning("[Health] readiness 실패 — FHIR %s %s", e.status, e.detail)
         response.status_code = 503
-        return {"status": "unavailable", "fhir": "error", "detail": e.detail}
+        return {"status": "unavailable", "fhir": "error", "detail": e.detail,
+                "token": "service" if settings.FHIR_TOKEN else "none"}
     except Exception:
         logger.warning("[Health] readiness 실패", exc_info=True)
         response.status_code = 503

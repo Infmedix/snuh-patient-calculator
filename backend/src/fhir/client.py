@@ -28,6 +28,7 @@ class FhirError(Exception):
 
 
 class FhirClient(Protocol):
+    has_token: bool
     async def get(self, path: str, params: Optional[dict] = None) -> dict: ...
     def describe(self) -> str: ...
 
@@ -39,6 +40,10 @@ class HttpFhirClient:
         self.base_url = base_url.rstrip("/")
         self._token = token
         self.timeout = timeout
+
+    @property
+    def has_token(self) -> bool:
+        return bool(self._token)
 
     def describe(self) -> str:
         return f"http {self.base_url} (token {'set' if self._token else 'missing'})"
@@ -90,6 +95,8 @@ def _detail(res: httpx.Response, path: str) -> str:
 # ===== mock (fixtures) =====
 
 class MockFhirClient:
+    has_token = True   # fixture 는 토큰이 필요 없다
+
     """`<fixtures>/patients/{환자번호}.json` (Bundle collection) 을 snuh-fhir 검색처럼 걸러서 돌려준다.
 
     지원 파라미터: Patient/{id}, Observation?patient&category&date(ge/gt/le/lt)&code&_count&_offset,

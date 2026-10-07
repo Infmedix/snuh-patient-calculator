@@ -19,12 +19,23 @@ logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/api", tags=["Patients"])
 
 
+# PAT 문제는 424(Failed Dependency) + code 로 돌려준다 — 401/403 을 그대로 내면 상위 gateway 가 계산기
+# 자체의 로그인 문제로 오해해 가로챌 수 있고, 프런트는 code 로 「토큰 재등록」과 「접근 허용 요청」을 구분해 안내한다.
+PAT_MISSING = {"code": "pat_missing",
+               "message": "FHIR 조회 토큰이 없습니다. 서버 설정(APP_FHIR_TOKEN)에 서비스 계정 PAT 를 넣거나, 화면에서 본인 PAT 를 등록하세요."}
+PAT_INVALID = {"code": "pat_invalid",
+               "message": "FHIR 토큰을 snuh-fhir 가 거부했습니다 (형식 오류·폐기·만료). 서버의 APP_FHIR_TOKEN 또는 등록한 PAT 를 확인하세요."}
+PAT_NO_ACCESS = {"code": "pat_no_access",
+                 "message": "토큰 소유자에게 FHIR 접근 허용이 없습니다. snuh-fhir 관리자가 그 계정에 접근 허용을 부여해야 합니다."}
+
+
 def _http_error(e: FhirError) -> HTTPException:
-    # 401/403 은 **이 서비스의** 설정·권한 문제이므로 502 로 바꿔 전달 (브라우저가 자기 토큰 문제로 오해하지 않게)
     if e.status == 404:
         return HTTPException(404, e.detail)
-    if e.status in (401, 403):
-        return HTTPException(502, e.detail)
+    if e.status == 401:
+        return HTTPException(424, PAT_INVALID)
+    if e.status == 403:
+        return HTTPException(424, PAT_NO_ACCESS)
     if e.status in (503, 504):
         return HTTPException(503, e.detail)
     if e.status == 400:
@@ -36,6 +47,8 @@ async def _snapshot(pid: str, client: FhirClient, now: datetime) -> Snapshot:
     pid = pid.strip()
     if not pid or len(pid) > 32 or "/" in pid:
         raise HTTPException(400, "환자번호 형식이 올바르지 않습니다")
+    if not client.has_token:
+        raise HTTPException(424, PAT_MISSING)
     try:
         raw = await fetch_patient_data(client, pid, now)
     except FhirError as e:

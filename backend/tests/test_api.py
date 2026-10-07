@@ -30,6 +30,23 @@ def test_readiness_mock(client):
     r = client.get("/api/health/ready")
     assert r.status_code == 200
     assert r.json()["fhir"] == "mock"
+    assert r.json()["token"] == "none"
+
+
+def test_readiness_reports_service_token(monkeypatch):
+    monkeypatch.setattr(settings, "FHIR_MODE", "http")
+    monkeypatch.setattr(settings, "FHIR_TOKEN", "snuhfhir_12345678_x")
+    from src import dependencies
+    class _Ok:
+        has_token = True
+        async def get(self, path, params=None): return {"status": "ok"}
+        def describe(self): return "ok"
+    monkeypatch.setattr(dependencies, "make_client", lambda token_override=None: _Ok())
+    from src.routers import health as h
+    monkeypatch.setattr(h, "make_client", lambda token_override=None: _Ok())
+    with TestClient(main.app) as c:
+        body = c.get("/api/health/ready").json()
+    assert body == {"status": "ok", "fhir": "ok", "token": "service"}
 
 
 # ===== calculators =====
@@ -170,6 +187,53 @@ def test_overview_marks_stale_values(client, monkeypatch):
     assert bmi["prefill"]["weight_kg"]["source"]["stale"] is True
 
 
+# ===== PAT 오류 매핑 =====
+
+class _FailingClient:
+    def __init__(self, status, token=True):
+        self.status = status
+        self.has_token = token
+
+    async def get(self, path, params=None):
+        raise FhirError(self.status, "x")
+
+    def describe(self):
+        return "failing"
+
+
+@pytest.mark.parametrize("status,code,http", [(401, "pat_invalid", 424), (403, "pat_no_access", 424), (503, None, 503), (404, None, 404)])
+def test_fhir_errors_map_to_pat_codes(status, code, http):
+    from src.dependencies import fhir_client
+    main.app.dependency_overrides[fhir_client] = lambda: _FailingClient(status)
+    try:
+        with TestClient(main.app) as c:
+            r = c.get("/api/patients/10000001/snapshot")
+        assert r.status_code == http
+        if code:
+            assert r.json()["detail"]["code"] == code
+    finally:
+        main.app.dependency_overrides.clear()
+
+
+def test_missing_token_is_424_before_calling_fhir():
+    from src.dependencies import fhir_client
+    main.app.dependency_overrides[fhir_client] = lambda: _FailingClient(500, token=False)
+    try:
+        with TestClient(main.app) as c:
+            r = c.get("/api/patients/10000001/snapshot")
+        assert r.status_code == 424 and r.json()["detail"]["code"] == "pat_missing"
+    finally:
+        main.app.dependency_overrides.clear()
+
+
+def test_x_fhir_token_header_overrides_env(monkeypatch):
+    from src import dependencies
+    monkeypatch.setattr(settings, "FHIR_MODE", "http")
+    monkeypatch.setattr(settings, "FHIR_TOKEN", None)
+    assert dependencies.make_client(None).has_token is False
+    assert dependencies.make_client("snuhfhir_abc").has_token is True
+
+
 # ===== prefix / ui =====
 
 def test_prefix_both_deployments(monkeypatch):
@@ -179,6 +243,21 @@ def test_prefix_both_deployments(monkeypatch):
         assert c.get("/api/health").status_code == 200                           # strip 된 배치
         r = c.get("/apps/runtime/calculator", follow_redirects=False)
         assert r.status_code == 307 and r.headers["location"] == "/apps/runtime/calculator/"
+
+
+def test_base_url_from_app_store_is_used_as_prefix(monkeypatch):
+    import importlib
+    from src import settings as s
+    monkeypatch.delenv("APP_PATH_PREFIX", raising=False)
+    monkeypatch.setenv("BASE_URL", "/apps/runtime/calc-test")
+    importlib.reload(s)
+    try:
+        assert s.PATH_PREFIX == "/apps/runtime/calc-test"
+        with TestClient(main.app) as c:
+            assert c.get("/apps/runtime/calc-test/api/health").status_code == 200
+    finally:
+        monkeypatch.delenv("BASE_URL")
+        importlib.reload(s)
 
 
 def test_root_redirects_relative_to_ui(client):

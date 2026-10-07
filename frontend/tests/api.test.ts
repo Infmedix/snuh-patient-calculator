@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { ApiError, apiUrl, calculate, errorMessage, fetchOverview } from "../src/api";
+import { ApiError, apiUrl, calculate, errorMessage, fetchOverview, fhirTokenPageUrl } from "../src/api";
 
 const UI_BASE = "https://host.example/apps/runtime/calculator/ui/";
 
@@ -54,5 +54,25 @@ describe("fetchOverview / errorMessage", () => {
       expect(e).toBeInstanceOf(ApiError);
       expect(errorMessage(e)).toBe("환자 x 를 찾을 수 없습니다");
     }
+  });
+});
+
+describe("PAT", () => {
+  it("fetchOverview 는 PAT 를 X-Fhir-Token 헤더로만 보낸다", async () => {
+    fetchMock.mockResolvedValue(json(200, { snapshot: {}, flag_labels: {}, calculators: [] }));
+    await fetchOverview("1", "snuhfhir_1a2b3c4d_secret");
+    const init = fetchMock.mock.calls[0][1] as RequestInit;
+    expect((init.headers as Record<string, string>)["X-Fhir-Token"]).toBe("snuhfhir_1a2b3c4d_secret");
+    expect(String(fetchMock.mock.calls[0][0])).not.toContain("secret");
+  });
+
+  it("424 의 code 를 ApiError.code 로 편다", async () => {
+    fetchMock.mockResolvedValue(json(424, { detail: { code: "pat_no_access", message: "접근 허용 없음" } }));
+    await expect(fetchOverview("1", "x")).rejects.toMatchObject({ status: 424, code: "pat_no_access", detail: "접근 허용 없음" });
+  });
+
+  it("snuh-fhir 내 토큰 화면 주소를 같은 gateway prefix 아래로 푼다", () => {
+    expect(fhirTokenPageUrl("https://ai.snuh.org/apps/runtime/calculator/ui/")).toBe("https://ai.snuh.org/apps/runtime/fhir/ui/#/");
+    expect(fhirTokenPageUrl("http://localhost:8010/ui/")).toBeNull();
   });
 });

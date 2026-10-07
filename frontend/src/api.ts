@@ -19,23 +19,33 @@ export interface InputErrorDetail {
   invalid: Record<string, string>;
 }
 
+/** 서버가 `{"code": "pat_missing", "message": ...}` 처럼 코드를 붙인 오류 (424 PAT 계열). */
+export type ApiErrorCode = "pat_missing" | "pat_invalid" | "pat_no_access" | string;
+
 export class ApiError extends Error {
   readonly status: number;
   readonly detail: string;
   readonly inputError: InputErrorDetail | null;
+  readonly code: ApiErrorCode | null;
   constructor(status: number, detail: unknown) {
     const ie = isInputErrorDetail(detail) ? detail : null;
-    const text = ie ? ie.message : detailToString(detail, status);
+    const coded = isCodedDetail(detail) ? detail : null;
+    const text = ie ? ie.message : coded ? coded.message : detailToString(detail, status);
     super(text);
     this.name = "ApiError";
     this.status = status;
     this.detail = text;
     this.inputError = ie;
+    this.code = coded?.code ?? null;
   }
 }
 
 function isInputErrorDetail(d: unknown): d is InputErrorDetail {
   return !!d && typeof d === "object" && "message" in d && "missing" in d;
+}
+
+function isCodedDetail(d: unknown): d is { code: string; message: string } {
+  return !!d && typeof d === "object" && "code" in d && "message" in d;
 }
 
 function detailToString(detail: unknown, status: number): string {
@@ -182,6 +192,8 @@ export interface Readiness {
   fhir?: string;
   fixtures?: number;
   detail?: string;
+  /** "service" = 서버에 서비스 계정 PAT(APP_FHIR_TOKEN) 있음 → 사용자 PAT 불필요. "none" = 사용자 PAT 필요(http) */
+  token?: "service" | "none";
 }
 
 /* ---------- 호출 ---------- */
@@ -190,8 +202,27 @@ export async function fetchCalculators(): Promise<CalculatorsResponse> {
   return unwrap(await fetch(apiUrl("api/calculators"), { cache: "no-store" }));
 }
 
-export async function fetchOverview(patientId: string): Promise<Overview> {
-  return unwrap(await fetch(apiUrl(`api/patients/${encodeURIComponent(patientId.trim())}/overview`), { cache: "no-store" }));
+/** PAT 는 헤더로만 보낸다 (URL·본문·로그 금지). null 이면 서버의 서비스 계정 토큰(있다면)으로 호출된다. */
+export async function fetchOverview(patientId: string, pat: string | null = null): Promise<Overview> {
+  const headers: Record<string, string> = {};
+  if (pat) headers["X-Fhir-Token"] = pat;
+  return unwrap(
+    await fetch(apiUrl(`api/patients/${encodeURIComponent(patientId.trim())}/overview`), { cache: "no-store", headers }),
+  );
+}
+
+/** snuh-fhir 「내 토큰」 화면 — 계산기와 같은 gateway 아래(/apps/runtime/fhir/ui/)에 있다고 가정해 문서 기준으로 푼다. */
+export function fhirTokenPageUrl(base?: string): string | null {
+  const b = base ?? (typeof document !== "undefined" ? document.baseURI : null);
+  if (!b) return null;
+  try {
+    const u = new URL(b);
+    // /apps/runtime/calculator/ui/ → /apps/runtime/fhir/ui/#/   (prefix 패턴이 다르면 null)
+    const m = /^(.*\/apps\/runtime\/)[^/]+\/ui\/?$/.exec(u.pathname);
+    return m ? `${u.origin}${m[1]}fhir/ui/#/` : null;
+  } catch {
+    return null;
+  }
 }
 
 export async function calculate(calcId: string, inputs: Record<string, unknown>): Promise<Result> {
