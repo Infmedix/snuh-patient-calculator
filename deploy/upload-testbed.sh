@@ -1,7 +1,7 @@
 #!/usr/bin/env sh
 # 테스트 서버 업로더(/upload) REST 로 ① 이미지 적재 ② 매니페스트 등록.
 #
-#   sh deploy/upload-testbed.sh 261007a [http://192.168.0.50] [auto=0|1]
+#   sh deploy/upload-testbed.sh 261007v1 [http://192.168.0.50] [auto=0|1]
 #
 # 전제: dist/snuh-patient-calculator-<TAG>.tar (build-and-save.sh) 가 있고, deploy/argo/kustomization.yaml newTag == TAG.
 # ② 는 GitLab airgap/snuh-patient-calculator 저장소와 Argo Application 을 만든다/갱신한다. auto=1 이면 Argo auto-sync.
