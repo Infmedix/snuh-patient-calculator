@@ -1,7 +1,7 @@
 import { useMemo, useState } from "react";
 import type { CalculatorSpec, Result } from "../api";
 import { copyText, summaryText, type CopyContext } from "../copy";
-import { splitByFavorites } from "../favorites";
+import { sortFavoritesFirst } from "../favorites";
 import { fmtNum } from "../format";
 import { SEVERITY_TONE, Tag, btn, input, td, th } from "../ui";
 
@@ -14,8 +14,8 @@ type Group = { name: string; items: CalculatorSpec[] };
 type Row = { spec: CalculatorSpec; group: string };
 
 /**
- * 요약 탭 - 「내 계산기」(별표) 를 위에, 「그 외」는 접어 둔다. 접힌 쪽에 위험 결과가 있으면 배너로 끌어올린다.
- * 검색어가 있으면 두 층을 무시하고 이름이 맞는 행만 보인다. 행을 누르면 해당 그룹 탭의 카드로 이동.
+ * 요약 탭 - 한 표. 별표한 계산기가 맨 위로 올라오고 나머지는 그 아래 (접지 않는다).
+ * 위험(danger) 결과가 하나라도 있으면 표 위에 배너로 모아 보여 준다. 검색어가 있으면 이름이 맞는 행만.
  */
 export default function SummaryTable({
   specs,
@@ -39,16 +39,12 @@ export default function SummaryTable({
   const done = specs.filter((s) => live[s.id]?.result).length;
   const [copied, setCopied] = useState<"ok" | "fail" | null>(null);
   const [query, setQuery] = useState("");
-  const [othersOpen, setOthersOpen] = useState(false);
 
   const ordered: Row[] = useMemo(() => groups.flatMap((g) => g.items.map((s) => ({ spec: s, group: g.name }))), [groups]);
   const q = query.trim().toLowerCase();
   const searched = q ? ordered.filter(({ spec }) => `${spec.name} ${spec.description} ${spec.id}`.toLowerCase().includes(q)) : null;
-  const { mine, others } = useMemo(
-    () => splitByFavorites(ordered.map((o) => ({ id: o.spec.id, ...o })), favorites),
-    [ordered, favorites],
-  );
-  const hiddenDanger = others.filter((o) => live[o.spec.id]?.result?.severity === "danger");
+  const sorted = useMemo(() => sortFavoritesFirst(ordered.map((o) => ({ id: o.spec.id, ...o })), favorites), [ordered, favorites]);
+  const dangers = ordered.filter((o) => live[o.spec.id]?.result?.severity === "danger");
 
   async function copyAll() {
     const items = ordered.flatMap(({ spec }) => (live[spec.id]?.result ? [{ spec, result: live[spec.id]!.result! }] : []));
@@ -157,10 +153,10 @@ export default function SummaryTable({
         />
       </div>
 
-      {hiddenDanger.length > 0 && !searched && (
+      {dangers.length > 0 && !searched && (
         <div className="border-t border-red-200 bg-red-50 px-4 py-2 text-xs text-red-800">
-          <span className="font-semibold">접힌 계산기에 위험 결과가 있습니다: </span>
-          {hiddenDanger.map((o, i) => (
+          <span className="font-semibold">계산 결과에 위험 결과가 있습니다 - </span>
+          {dangers.map((o, i) => (
             <span key={o.spec.id}>
               {i > 0 && " · "}
               <button type="button" className="underline hover:text-red-900" onClick={() => onJump(o.spec.id)}>
@@ -180,24 +176,10 @@ export default function SummaryTable({
         )
       ) : (
         <>
-          <div className="border-t border-gray-100 px-4 pt-2 text-[11px] text-gray-500">
-            {favorites.length ? `내 계산기 ${mine.length}개 (별표)` : "별표(☆)로 자주 쓰는 계산기를 위에 고정할 수 있습니다"}
-          </div>
-          {renderTable(mine)}
-          {others.length > 0 && (
-            <div className="border-t border-gray-100">
-              <button
-                type="button"
-                className="flex w-full items-center justify-between px-4 py-2 text-left text-xs text-gray-600 hover:bg-gray-50"
-                onClick={() => setOthersOpen((v) => !v)}
-                aria-expanded={othersOpen}
-              >
-                <span>그 외 {others.length}개</span>
-                <span>{othersOpen ? "▴" : "▾"}</span>
-              </button>
-              {othersOpen && renderTable(others)}
-            </div>
+          {favorites.length === 0 && (
+            <div className="border-t border-gray-100 px-4 pt-2 text-[11px] text-gray-500">별표(☆)를 찍은 계산기는 맨 위로 올라옵니다.</div>
           )}
+          {renderTable(sorted)}
         </>
       )}
     </section>

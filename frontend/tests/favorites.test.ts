@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { getFavorites, setFavorites, sortFavoritesFirst, splitByFavorites, toggleFavorite } from "../src/favorites";
+import { getFavorites, setFavorites, sortFavoritesFirst, toggleFavorite } from "../src/favorites";
 
 beforeEach(() => {
   const store = new Map<string, string>();
@@ -21,12 +21,6 @@ describe("favorites", () => {
     expect(JSON.parse(localStorage.getItem("snuhcalc.favorites")!)).toEqual(["sofa", "egfr"]);
     toggleFavorite("sofa");
     expect(getFavorites()).toEqual(["egfr"]);
-  });
-
-  it("별표가 없으면 전부 내 계산기", () => {
-    const items = [{ id: "a" }, { id: "b" }, { id: "c" }];
-    expect(splitByFavorites(items, [])).toEqual({ mine: items, others: [] });
-    expect(splitByFavorites(items, ["c"])).toEqual({ mine: [{ id: "c" }], others: [{ id: "a" }, { id: "b" }] });
   });
 
   it("그룹 안에서는 별표가 먼저, 원래 순서 유지", () => {

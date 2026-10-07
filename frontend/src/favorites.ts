@@ -42,13 +42,6 @@ export function toggleFavorite(id: string): string[] {
   return setFavorites(cur.includes(id) ? cur.filter((x) => x !== id) : [...cur, id]);
 }
 
-/** 별표가 하나도 없으면 전부를 「내 계산기」로 본다 (처음 쓰는 사람에게 빈 화면을 보이지 않기 위해). */
-export function splitByFavorites<T extends { id: string }>(items: T[], favorites: string[]): { mine: T[]; others: T[] } {
-  if (favorites.length === 0) return { mine: items, others: [] };
-  const set = new Set(favorites);
-  return { mine: items.filter((i) => set.has(i.id)), others: items.filter((i) => !set.has(i.id)) };
-}
-
 /** 그룹 탭 안 정렬 - 별표가 먼저, 그 안에서는 원래 순서 유지. */
 export function sortFavoritesFirst<T extends { id: string }>(items: T[], favorites: string[]): T[] {
   const set = new Set(favorites);
