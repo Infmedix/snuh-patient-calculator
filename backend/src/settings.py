@@ -120,6 +120,7 @@ VARIABLE_MAP_PATH = _env("APP_VARIABLE_MAP_PATH")
 
 # ===== 배포 =====
 # 외부 공개 경로 prefix (예: /apps/runtime/calculator). 미설정 = prefix 없음.
-PATH_PREFIX = _env("APP_PATH_PREFIX") or ""
+# snuhai 앱 스토어(snuhai-paas)는 컨테이너에 BASE_URL=/apps/runtime/{slug} 를 주입한다 — APP_PATH_PREFIX 가 없으면 그 값을 쓴다.
+PATH_PREFIX = _env("APP_PATH_PREFIX") or _env("BASE_URL") or ""
 # 빌드된 프런트(dist) 경로. 없으면 /ui 만 404, 부팅 정상.
 UI_DIST_DIR = _env("APP_UI_DIST_DIR") or str(_BACKEND_DIR.parent / "frontend" / "dist")

@@ -48,4 +48,5 @@ COPY --from=frontend /fe/dist ./frontend/dist
 
 WORKDIR /app/backend
 # --no-access-log: 경로의 환자번호가 stdout 에 남지 않게 (main.py 의 로거 차단과 이중 방어)
-CMD ["sh", "-c", "uvicorn main:app --host 0.0.0.0 --port ${APP_PORT:-8000} --no-access-log"]
+# 포트: APP_PORT > PORT(snuhai 앱 스토어가 주입, 기본 8080) > 8000
+CMD ["sh", "-c", "uvicorn main:app --host 0.0.0.0 --port ${APP_PORT:-${PORT:-8000}} --no-access-log"]
