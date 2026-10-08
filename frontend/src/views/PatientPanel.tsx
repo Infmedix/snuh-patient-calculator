@@ -132,7 +132,7 @@ export default function PatientPanel({
         {!showValues ? null : rows.length === 0 ? (
           <p className="px-4 py-3 text-xs text-gray-400">조회 기간 안에 매칭되는 기록이 없습니다.</p>
         ) : (
-          <div className="max-h-[60vh] overflow-y-auto overflow-x-hidden px-2 pb-2">
+          <div className="scroll-stable max-h-[60vh] overflow-y-auto overflow-x-hidden px-2 pb-2">
             <table className="w-full table-fixed">
               <thead>
                 <tr>

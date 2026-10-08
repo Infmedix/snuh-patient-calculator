@@ -1,1 +1,10 @@
 @import "tailwindcss";
+
+/* 세로 스크롤바가 생기고 사라질 때(탭 전환·환자 로드) 본문 너비가 흔들리지 않게 스크롤바 자리를 항상 확보한다 */
+html {
+  scrollbar-gutter: stable;
+}
+/* 패널 안 스크롤 영역도 같은 이유 */
+.scroll-stable {
+  scrollbar-gutter: stable;
+}
