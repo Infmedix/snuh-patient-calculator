@@ -19,7 +19,8 @@ SIZE=$(wc -c < "${TAR}" | tr -d ' ')
 echo "[①] 세션 생성 (project=${APP} tag=${TAG} size=${SIZE})"
 SESSION=$(curl -sf -X POST "${HOST}/upload/api/sessions" -H 'Content-Type: application/json' \
   -d "{\"kind\":\"image\",\"files\":[{\"path\":\"$(basename "${TAR}")\",\"size\":${SIZE},\"mtime\":null}],\"options\":{\"name\":\"${APP}\",\"image\":\"\",\"tag\":\"${TAG}\",\"multi\":false}}")
-SID=$(printf '%s' "${SESSION}" | sed -n 's/.*"id": *"\([^"]*\)".*/\1/p' | head -1)
+# 세션 id 는 응답 맨 앞의 "id". `.*"id"` 처럼 탐욕 매칭하면 files[].id 를 집어 404 가 난다
+SID=$(printf '%s' "${SESSION}" | sed -n 's/^[[:space:]]*{[[:space:]]*"id": *"\([^"]*\)".*/\1/p' | head -1)
 FID=$(printf '%s' "${SESSION}" | sed -n 's/.*"files": *\[{[^}]*"id": *"\([^"]*\)".*/\1/p' | head -1)
 [ -n "${SID}" ] && [ -n "${FID}" ] || { echo "세션 응답 해석 실패: ${SESSION}"; exit 1; }
 echo "[①] tar 전송 (session ${SID})"
@@ -40,7 +41,12 @@ if [ -f deploy/argo/secrets.env ]; then
 else
   cp deploy/argo/config.env "${STAGE}/"
 fi
-(cd "${STAGE}" && zip -q "${OLDPWD}/${ZIP}" kustomization.yaml config.env deployment.yaml service.yaml)
+# Git Bash 에는 zip 이 없다 → Windows 기본 bsdtar(-a 가 확장자로 zip 형식 선택)로 대체
+if command -v zip > /dev/null 2>&1; then
+  (cd "${STAGE}" && zip -q "${OLDPWD}/${ZIP}" kustomization.yaml config.env deployment.yaml service.yaml)
+else
+  /c/Windows/System32/tar.exe -a -c -f "${ZIP}" -C "${STAGE}" kustomization.yaml config.env deployment.yaml service.yaml
+fi
 rm -rf "${STAGE}"
 echo "[②] 매니페스트 등록 (app=${APP} ns=platform auto=${AUTO})"
 curl -sf -X PUT "${HOST}/upload/manifest?name=${APP}&ns=platform&auto=${AUTO}" --data-binary "@${ZIP}"
