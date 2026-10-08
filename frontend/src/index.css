@@ -8,3 +8,11 @@ html {
 .scroll-stable {
   scrollbar-gutter: stable;
 }
+/* 계산기 탭 줄처럼 가로로 넘칠 수 있는 띠 - 스크롤은 되게 두되 스크롤바 자체는 그리지 않아 높이가 흔들리지 않게 */
+.scrollbar-hidden {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+.scrollbar-hidden::-webkit-scrollbar {
+  display: none;
+}

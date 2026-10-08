@@ -309,7 +309,7 @@ export default function App() {
             {!specs && !specsErr && <p className="text-sm text-gray-500">계산기 목록 불러오는 중…</p>}
             {specs && (
               <>
-                <nav className="mb-4 flex gap-1 overflow-x-auto border-b border-gray-200 pb-2" aria-label="계산기 그룹">
+                <nav className="scrollbar-hidden mb-4 flex gap-1 overflow-x-auto border-b border-gray-200 pb-2" aria-label="계산기 그룹">
                   <button type="button" className={tabCls(tab === SUMMARY_TAB)} onClick={() => setTab(SUMMARY_TAB)}>
                     요약
                   </button>
