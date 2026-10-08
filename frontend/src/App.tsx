@@ -13,6 +13,7 @@ import {
 } from "./api";
 import { getFavorites, sortFavoritesFirst, toggleFavorite } from "./favorites";
 import { clearPat, getPat, maskPat, setPat } from "./pat";
+import { Tabs, TabsList, TabsTrigger } from "./components/ui/tabs";
 import { ErrorBox, Tag, btn, input } from "./ui";
 import CalculatorCard from "./views/CalculatorCard";
 import PatPanel from "./views/PatPanel";
@@ -219,9 +220,6 @@ export default function App() {
     setFavoritesState(toggleFavorite(id));
   }
 
-  const tabCls = (active: boolean) =>
-    `rounded px-3 py-1.5 text-sm whitespace-nowrap ${active ? "bg-indigo-50 font-medium text-indigo-700" : "text-gray-600 hover:bg-gray-100"}`;
-
   return (
     <div className="min-h-screen bg-gray-50">
       <header className="sticky top-0 z-10 border-b border-gray-200 bg-white/95 backdrop-blur">
@@ -309,22 +307,24 @@ export default function App() {
             {!specs && !specsErr && <p className="text-sm text-gray-500">계산기 목록 불러오는 중…</p>}
             {specs && (
               <>
-                <nav className="scrollbar-hidden mb-4 flex gap-1 overflow-x-auto border-b border-gray-200 pb-2" aria-label="계산기 그룹">
-                  <button type="button" className={tabCls(tab === SUMMARY_TAB)} onClick={() => setTab(SUMMARY_TAB)}>
-                    요약
-                  </button>
-                  {groups.map((g) => {
-                    const d = groupDone[g.name];
-                    return (
-                      <button key={g.name} type="button" className={tabCls(tab === g.name)} onClick={() => setTab(g.name)}>
-                        {g.name}
-                        <span className={`ml-1.5 text-[11px] ${d.done === d.total ? "text-emerald-600" : "text-gray-400"}`}>
-                          {d.done}/{d.total}
-                        </span>
-                      </button>
-                    );
-                  })}
-                </nav>
+                <Tabs value={tab} onValueChange={setTab} className="mb-4">
+                  <TabsList className="scrollbar-hidden h-auto w-full justify-start overflow-x-auto sm:w-fit" aria-label="계산기 그룹">
+                    <TabsTrigger value={SUMMARY_TAB} className="flex-none px-3.5 py-1.5">
+                      요약
+                    </TabsTrigger>
+                    {groups.map((g) => {
+                      const d = groupDone[g.name];
+                      return (
+                        <TabsTrigger key={g.name} value={g.name} className="flex-none px-3.5 py-1.5">
+                          {g.name}
+                          <span className={`text-[11px] font-normal tabular-nums ${d.done === d.total ? "text-emerald-600" : "text-muted-foreground"}`}>
+                            {d.done}/{d.total}
+                          </span>
+                        </TabsTrigger>
+                      );
+                    })}
+                  </TabsList>
+                </Tabs>
 
                 <div hidden={tab !== SUMMARY_TAB}>
                   <SummaryTable
