@@ -81,7 +81,7 @@ export default function SummaryTable({
           <div className="font-medium text-gray-900">{spec.name}</div>
           <div className="text-[11px] text-gray-400">{group}</div>
         </td>
-        <td className={`${td} w-36 whitespace-nowrap text-right font-mono sm:w-44`}>
+        <td className={`${td} w-36 whitespace-nowrap text-right font-mono sm:w-0`}>
           {res ? (
             <>
               <span className="text-base font-semibold text-gray-900">{fmtNum(res.value, 1)}</span>
@@ -117,7 +117,7 @@ export default function SummaryTable({
           <tr className="bg-gray-50">
             <th className={`${th} w-8`}></th>
             <th className={th}>계산기</th>
-            <th className={`${th} w-36 text-right sm:w-44`}>결과</th>
+            <th className={`${th} w-36 whitespace-nowrap text-right sm:w-0`}>결과</th>
             <th className={`${th} pl-6 sm:pl-12`}>해석</th>
             <th className={`${th} hidden sm:table-cell`}></th>
           </tr>
